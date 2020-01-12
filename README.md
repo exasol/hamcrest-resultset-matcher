@@ -1,9 +1,10 @@
 # hamcrest-resultset-matcher
+
 Matcher for SQL resultsets
 
 # Overview
 
-This project provides hamcrest matcher that compares java.sql.ResultSet objects.
+This project provides hamcrest matcher that compares `java.sql.ResultSet` objects.
 
 ## Customer Support
 
@@ -20,7 +21,6 @@ Running the Hamcrest ResultSet Matcher requires a Java Runtime version 11 or lat
 | Dependency                                                                          | Purpose                                                | License                       |
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
 | [Java Hamcrest](http://hamcrest.org/JavaHamcrest/)                                  | Checking for conditions in code via matchers           | BSD License                   |
-| [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
 
 # License
 
