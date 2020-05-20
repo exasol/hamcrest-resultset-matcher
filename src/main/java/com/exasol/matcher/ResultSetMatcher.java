@@ -1,10 +1,14 @@
 package com.exasol.matcher;
 
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-
-import java.math.BigDecimal;
-import java.sql.*;
 
 /**
  * This matcher compares two result sets.
@@ -47,7 +51,7 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
 
     @Override
     protected void describeMismatchSafely(final ResultSet item, final Description mismatchDescription) {
-        mismatchDescription.appendText(errorMessage.toString());
+        mismatchDescription.appendText(this.errorMessage.toString());
         super.describeMismatchSafely(item, mismatchDescription);
     }
 
@@ -60,8 +64,8 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         final int expectedColumnCount = this.expectedResultSet.getMetaData().getColumnCount();
         final int actualColumnCount = actualResultSet.getMetaData().getColumnCount();
         if (expectedColumnCount != actualColumnCount) {
-            errorMessage.append("Column count doesn't match. Expected column count: ").append(expectedColumnCount);
-            errorMessage.append(", actual column count: ").append(actualColumnCount).append("\n");
+            this.errorMessage.append("Column count doesn't match. Expected column count: ").append(expectedColumnCount);
+            this.errorMessage.append(", actual column count: ").append(actualColumnCount).append("\n");
             return false;
         }
         boolean expectedNext;
@@ -69,12 +73,13 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         do {
             expectedNext = this.expectedResultSet.next();
             rowCounter++;
-            if (expectedNext != actualResultSet.next() || this.expectedResultSet.isLast() != actualResultSet.isLast()) {
-                errorMessage.append("Expected and actual result sets have different number of rows.\n");
+            if ((expectedNext != actualResultSet.next())
+                    || (this.expectedResultSet.isLast() != actualResultSet.isLast())) {
+                this.errorMessage.append("Expected and actual result sets have different number of rows.\n");
                 return false;
             }
             if (expectedNext && !doesRowMatch(actualResultSet, expectedColumnCount)) {
-                errorMessage.append(", row ").append(rowCounter).append(")\n");
+                this.errorMessage.append(", row ").append(rowCounter).append(")\n");
                 return false;
             }
         } while (expectedNext);
@@ -84,7 +89,7 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     private boolean doesRowMatch(final ResultSet actualResultSet, final int expectedColumnCount) throws SQLException {
         for (int column = 1; column <= expectedColumnCount; ++column) {
             if (!doesFieldMatch(actualResultSet, column)) {
-                errorMessage.append(" (column ").append(column);
+                this.errorMessage.append(" (column ").append(column);
                 return false;
             }
         }
@@ -97,8 +102,8 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         if (resultSetTypeExpected == resultSetTypeActual) {
             return doesValueMatch(actualRow, column, resultSetTypeExpected);
         } else {
-            errorMessage.append("Data type does not match. Expected: ").append(resultSetTypeExpected);
-            errorMessage.append(", actual: ").append(resultSetTypeActual);
+            this.errorMessage.append("Data type does not match. Expected: ").append(resultSetTypeExpected);
+            this.errorMessage.append(", actual: ").append(resultSetTypeActual);
             return false;
         }
     }
@@ -106,28 +111,28 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     private boolean doesValueMatch(final ResultSet actualRow, final int column, final int resultSetTypeExpected)
             throws SQLException {
         switch (resultSetTypeExpected) {
-            case Types.BIGINT:
-            case Types.SMALLINT:
-            case Types.INTEGER:
-                return doesIntegerMatch(actualRow, column);
-            case Types.DOUBLE:
-                return doesDoubleMatch(actualRow, column);
-            case Types.DECIMAL:
-                return doesDecimalMatch(actualRow, column);
-            case Types.CHAR:
-            case Types.VARCHAR:
-            case EXASOL_INTERVAL_YEAR_TO_MONTHS:
-            case EXASOL_INTERVAL_DAY_TO_SECONDS:
-                return doesStringMatch(actualRow, column);
-            case Types.BOOLEAN:
-                return doesBooleanMatch(actualRow, column);
-            case Types.DATE:
-                return doesDateMatch(actualRow, column);
-            case Types.TIMESTAMP:
-                return doesTimestampMatch(actualRow, column);
-            default:
-                throw new AssertionError("Unknown data type: " + resultSetTypeExpected + " in column " + column
-                        + ". ResultSetMatcher doesn't support comparing this data type yet.");
+        case Types.BIGINT:
+        case Types.SMALLINT:
+        case Types.INTEGER:
+            return doesIntegerMatch(actualRow, column);
+        case Types.DOUBLE:
+            return doesDoubleMatch(actualRow, column);
+        case Types.DECIMAL:
+            return doesDecimalMatch(actualRow, column);
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case EXASOL_INTERVAL_YEAR_TO_MONTHS:
+        case EXASOL_INTERVAL_DAY_TO_SECONDS:
+            return doesStringMatch(actualRow, column);
+        case Types.BOOLEAN:
+            return doesBooleanMatch(actualRow, column);
+        case Types.DATE:
+            return doesDateMatch(actualRow, column);
+        case Types.TIMESTAMP:
+            return doesTimestampMatch(actualRow, column);
+        default:
+            throw new AssertionError("Unknown data type: " + resultSetTypeExpected + " in column " + column
+                    + ". ResultSetMatcher doesn't support comparing this data type yet.");
         }
     }
 
@@ -166,9 +171,9 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private void writeFieldValueMismatchErrorMessage(final String valueType, final String expectedValue,
-                                                     final String actualValue) {
-        errorMessage.append(valueType).append(" field value does not match. Expected: ").append(expectedValue);
-        errorMessage.append(", actual: ").append(actualValue);
+            final String actualValue) {
+        this.errorMessage.append(valueType).append(" field value does not match. Expected: ").append(expectedValue);
+        this.errorMessage.append(", actual: ").append(actualValue);
     }
 
     private boolean doesDoubleMatch(final ResultSet actualRow, final int column) throws SQLException {
@@ -190,7 +195,7 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private <T> boolean doesObjectMatch(final String dataTypeName, final T expectedValue, final T actualValue) {
-        if (expectedValue == null || actualValue == null) {
+        if ((expectedValue == null) || (actualValue == null)) {
             return doesPrimitiveTypeMatch(dataTypeName, expectedValue, actualValue);
         }
         if (expectedValue.equals(actualValue)) {

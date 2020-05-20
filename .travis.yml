@@ -3,7 +3,7 @@ matrix:
   include:
     - jdk: openjdk11
 script:
-  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dsonar.projectKey=com.exasol:java-util-logging-testing -Dsonar.login=${SONAR_TOKEN}
+  - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -Dsonar.projectKey=com.exasol:hamcrest-resultset-matcher -Dsonar.login=${SONAR_TOKEN}
 cache:
   directories:
     - "$HOME/.m2"
