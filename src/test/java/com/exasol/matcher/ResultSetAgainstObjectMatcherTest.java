@@ -2,7 +2,6 @@ package com.exasol.matcher;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,16 +55,19 @@ class ResultSetAgainstObjectMatcherTest {
         execute("CREATE TABLE TO_MANY_ROWS(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO TO_MANY_ROWS VALUES ('foo', 1), ('bar', 2)");
         assertQueryResultNotMatched("SELECT * FROM TO_MANY_ROWS", table().row("foo", 1).matches(),
-                "more than the expected 1 rows");
+                "ResultSet with <1> rows and <2> columns", "ResultSet with <2> rows and <2> columns");
     }
 
     private void assertQueryResultNotMatched(final String sql, final Matcher<ResultSet> matcher,
-            final String expectedMessage) {
+            final String expectedMessage, final String actualMessage) {
         final ResultSet resultSet = query(sql);
         assertThat(resultSet, not(matcher));
-        final Description description = new StringDescription();
-        matcher.describeTo(description);
-        assertThat(description.toString(), containsString(expectedMessage));
+        final Description expectedDescription = new StringDescription();
+        matcher.describeTo(expectedDescription);
+        assertThat("expectation message", expectedDescription.toString(), equalTo(expectedMessage));
+        final Description mismatchDescription = new StringDescription();
+        matcher.describeMismatch(resultSet, mismatchDescription);
+        assertThat("mismatch message", mismatchDescription.toString(), equalTo(actualMessage));
     }
 
     @Test
@@ -73,8 +75,8 @@ class ResultSetAgainstObjectMatcherTest {
         execute("CREATE TABLE TO_FEW_ROWS(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO TO_FEW_ROWS VALUES ('foo', 1), ('bar', 2)");
         assertQueryResultNotMatched("SELECT * FROM TO_FEW_ROWS",
-                table().row("foo", 1).row("bar", 2).row("baz", 3).matches(),
-                "Expected result set ot have 3 rows, but it only had 2.");
+                table().row("foo", 1).row("bar", 2).row("baz", 3).matches(), "ResultSet with <3> rows and <2> columns",
+                "ResultSet with <2> rows and <2> columns");
     }
 
     @Test
@@ -82,7 +84,8 @@ class ResultSetAgainstObjectMatcherTest {
         execute("CREATE TABLE CELL_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO CELL_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
         assertQueryResultNotMatched("SELECT * FROM CELL_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
-                "Result deviates in row 2, column 1. Expected: 'bar' But was: 'error_here'.");
+                "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
+                        + " where content deviates starting row <2>, column <1> with value \"error_here\" instead of \"bar\"");
     }
 
     @Test
@@ -96,6 +99,17 @@ class ResultSetAgainstObjectMatcherTest {
         execute("CREATE TABLE COLUMN_COUNT_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER, COL3 BOOLEAN)");
         execute("INSERT INTO COLUMN_COUNT_MISMATCH VALUES ('foo', 1, true), ('bar', 2, false)");
         assertQueryResultNotMatched("SELECT * FROM COLUMN_COUNT_MISMATCH",
-                table().row("foo", 1).row("bar", 2).matches(), "");
+                table().row("foo", 1).row("bar", 2).matches(), "ResultSet with <2> rows and <2> columns",
+                "ResultSet with <2> rows and <3> columns");
+    }
+
+    @Test
+    void testDetectColumnTypeMismatch() {
+        execute("CREATE TABLE COLUMN_TYPE_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER, COL3 BOOLEAN)");
+        execute("INSERT INTO COLUMN_TYPE_MISMATCH VALUES ('foo', 1, true), ('bar', 2, false)");
+        assertQueryResultNotMatched("SELECT * FROM COLUMN_TYPE_MISMATCH",
+                table("VARCHAR", "INTEGER", "DATE").row("foo", 1, true).row("bar", 2, false).matches(),
+                "ResultSet with <2> rows and <3> columns (VARCHAR, INTEGER, DATE)",
+                "ResultSet with <2> rows and <3> columns (VARCHAR, INTEGER, BOOLEAN)");
     }
 }

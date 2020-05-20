@@ -16,17 +16,64 @@ import org.hamcrest.TypeSafeMatcher;
  */
 public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private final List<List<Object>> expectedTable;
-    private final int expectedColumnCount;
-    private String collectedDescription;
+    private final List<Column> expectedColumns;
+    private int actualRowCount;
+    private boolean contentDeviates;
+    private int deviationStartColumn;
+    private int deviationStartRow;
+    private Object actualCellValue;
+    private final List<Column> actualColumns = new ArrayList<>();
 
     private ResultSetStructureMatcher(final Builder builder) {
-        this.expectedTable = builder.structure;
-        this.expectedColumnCount = builder.columnCount;
+        this.expectedTable = builder.expectedTable;
+        this.expectedColumns = builder.expectedColumns;
+        this.contentDeviates = false;
     }
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText(this.collectedDescription);
+        description.appendText("ResultSet with ") //
+                .appendValue(this.expectedTable.size()) //
+                .appendText(" rows and ") //
+                .appendValue(getExpectedColumnCount()) //
+                .appendText(" columns");
+        if (isAnyColumnDetailSpecified()) {
+            description.appendList(" (", ", ", ")", this.expectedColumns);
+        }
+    }
+
+    private boolean isAnyColumnDetailSpecified() {
+        for (final Column column : this.expectedColumns) {
+            if (column.isSpecified()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Note that we can't iterate over the rows again here since not all JDBC drivers support rewinding a result set.
+    // That means we need to already collect all information we want to display here during the match.
+    @Override
+    protected void describeMismatchSafely(final ResultSet item, final Description mismatchDescription) {
+        mismatchDescription.appendText("ResultSet with ") //
+                .appendValue(this.actualRowCount) //
+                .appendText(" rows and ") //
+                .appendValue(this.actualColumns.size()) //
+                .appendText(" columns");
+        if (isAnyColumnDetailSpecified()) {
+            mismatchDescription //
+                    .appendList(" (", ", ", ")", this.actualColumns);
+        }
+        if (this.contentDeviates) {
+            mismatchDescription.appendText(" where content deviates starting row ") //
+                    .appendValue(this.deviationStartRow) //
+                    .appendText(", column ") //
+                    .appendValue(this.deviationStartColumn) //
+                    .appendText(" with value ") //
+                    .appendValue(this.actualCellValue) //
+                    .appendText(" instead of ") //
+                    .appendValue(this.expectedTable.get(this.deviationStartRow - 1).get(this.deviationStartColumn - 1));
+        }
     }
 
     @Override
@@ -39,32 +86,44 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                     ++rowIndex;
                     ok = ok && matchValuesInRowMatch(resultSet, rowIndex, expectedRow);
                 } else {
-                    this.collectedDescription = "Expected result set ot have " + this.expectedTable.size()
-                            + " rows, but it only had " + rowIndex + ".";
                     ok = false;
                 }
             }
-            if (resultSet.next()) {
-                this.collectedDescription = "Result table has more than the expected " + this.expectedTable.size()
-                        + " rows.";
+            while (resultSet.next()) {
                 ok = false;
+                ++rowIndex;
             }
+            this.actualRowCount = rowIndex;
+            return ok;
         } catch (final SQLException exception) {
-            this.collectedDescription = "Unable to check result set: " + exception.getMessage();
-            ok = false;
+            throw new AssertionError("Unable to check result set: " + exception.getMessage());
         }
-        return ok;
     }
 
     private boolean matchColumns(final ResultSet resultSet) {
-        ResultSetMetaData metadata;
         try {
-            metadata = resultSet.getMetaData();
-            return metadata.getColumnCount() == this.expectedColumnCount;
-        } catch (final SQLException e) {
-            this.collectedDescription = "Unable to determine result's the result set's column count.";
+            final ResultSetMetaData metadata = resultSet.getMetaData();
+            final int actualColumnCount = metadata.getColumnCount();
+            boolean ok = (actualColumnCount == getExpectedColumnCount());
+            for (int columnIndex = 1; columnIndex <= getExpectedColumnCount(); ++columnIndex) {
+                final String actualColumnTypeName = metadata.getColumnTypeName(columnIndex);
+                final Column expectedColumn = this.expectedColumns.get(columnIndex - 1);
+                if (expectedColumn.hasType()) {
+                    ok = ok && actualColumnTypeName.equalsIgnoreCase(expectedColumn.getTypeName());
+                }
+                this.actualColumns.add(Column.column(actualColumnTypeName));
+            }
+            for (int columnIndex = getExpectedColumnCount() + 1; columnIndex <= actualColumnCount; columnIndex++) {
+                this.actualColumns.add(Column.column(metadata.getColumnTypeName(columnIndex)));
+            }
+            return ok;
+        } catch (final SQLException exception) {
             return false;
         }
+    }
+
+    private int getExpectedColumnCount() {
+        return this.expectedColumns.size();
     }
 
     private boolean matchValuesInRowMatch(final ResultSet resultSet, final int rowIndex,
@@ -75,21 +134,42 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 ++columnIndex;
                 final Object value = resultSet.getObject(columnIndex);
                 if (!value.equals(expectedValue)) {
-                    this.collectedDescription = "Result deviates in row " + rowIndex + ", column " + columnIndex
-                            + ". Expected: '" + expectedValue + "' But was: '" + value + "'.";
+                    this.contentDeviates = true;
+                    this.deviationStartRow = rowIndex;
+                    this.deviationStartColumn = columnIndex;
+                    this.actualCellValue = value;
                     return false;
                 }
             }
         } catch (final SQLException exception) {
-            this.collectedDescription = "Unable to read actual result set value in row " + rowIndex + ", column "
-                    + columnIndex + ": " + exception.getMessage();
-            return false;
+            throw new AssertionError("Unable to read actual result set value in row " + rowIndex + ", column "
+                    + columnIndex + ": " + exception.getMessage());
         }
         return true;
     }
 
+    /**
+     * Builder for a {@link ResultSetMatcher} that ignores the column metadata.
+     *
+     * @return Builder instance
+     */
     public static Builder table() {
         return new Builder();
+    }
+
+    /**
+     * Builder for a {@link ResultSetMatcher} that ignores the column metadata.
+     *
+     * @param types description of the expected result set columns
+     *
+     * @return Builder instance
+     */
+    public static Builder table(final String... types) {
+        final List<Column> expectedColumns = new ArrayList<>(types.length);
+        for (final String type : types) {
+            expectedColumns.add(Column.column(type));
+        }
+        return new Builder(expectedColumns);
     }
 
     /**
@@ -97,9 +177,16 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
      *
      */
     public static final class Builder {
-        private final List<List<Object>> structure = new ArrayList<>();
-        private int columnCount = -1;
+        private final List<List<Object>> expectedTable = new ArrayList<>();
         private int rows = 0;
+        private List<Column> expectedColumns = null;
+
+        public Builder() {
+        }
+
+        public Builder(final List<Column> expectedColumns) {
+            this.expectedColumns = expectedColumns;
+        }
 
         /**
          * Add a row to the structure to be matched.
@@ -109,14 +196,28 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          */
         public Builder row(final Object... cellValues) {
             ++this.rows;
-            if (this.columnCount < 0) {
-                this.columnCount = cellValues.length;
-            } else if (cellValues.length != this.columnCount) {
-                throw new AssertionError("Error constructing expected row " + this.rows + ". Expected "
-                        + this.columnCount + " columns, but got " + cellValues.length + ".");
+            final int length = cellValues.length;
+            if (this.expectedColumns == null) {
+                setColumnCountExpectation(length);
+            } else {
+                validateColumnCount(length);
             }
-            this.structure.add(Arrays.asList(cellValues));
+            this.expectedTable.add(Arrays.asList(cellValues));
             return this;
+        }
+
+        private void setColumnCountExpectation(final int length) {
+            this.expectedColumns = new ArrayList<>(length);
+            for (int i = 0; i < length; ++i) {
+                this.expectedColumns.add(Column.any());
+            }
+        }
+
+        private void validateColumnCount(final int length) throws AssertionError {
+            if (length != this.expectedColumns.size()) {
+                throw new AssertionError("Error constructing expected row " + this.rows + ". Expected "
+                        + this.expectedColumns.size() + " columns, but got " + length + ".");
+            }
         }
 
         public Matcher<ResultSet> matches() {

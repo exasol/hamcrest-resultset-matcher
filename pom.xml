@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher</url>
