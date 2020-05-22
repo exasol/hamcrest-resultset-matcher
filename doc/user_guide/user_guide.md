@@ -57,7 +57,30 @@ Depending on your personal preferences or the use case for the test, you can pic
 
 ## The `ResultSetMatcher`
 
-TODO: add
+This matcher allows you to compare two `ResultSet`'s. This can be helpful when you need, for example, to compare each value of two tables.
+
+A minimal test would then look as in the example below.
+
+```java
+import java.sql.ResultSet;import static org.hamcrest.MatcherAssert.assertThat;
+
+// ...
+
+class CustomerTablePopulationTest {
+    @Test
+    void testTableContents() {
+        // ...
+        final ResulSet table1 = statement1.execute("SELECT * FROM CUSTOMERS");
+        final ResultSet table2 = statement2.execute("SELECT * FROM CUSTOMERS2");
+        
+        assertThat(table1, matchesResultSet(table2));
+    } 
+}
+```
+
+Please keep in mind that you need to have two opened `ResultSet`s for this matcher. 
+Some JDBC drivers close the previously opened `ResultSet` as soon as you execute the next query on a `Statement`. 
+So you might be need to have two statements as shown in the example above. 
 
 ## The `ResultSetStructureMatcher`
 
