@@ -15,8 +15,8 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
 
     @BeforeEach
     void beforeEach() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
-        statement = connection.createStatement();
+        this.connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
+        this.statement = this.connection.createStatement();
     }
 
     @Test
@@ -25,21 +25,21 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO SIMPLE_TABLE VALUES ('foo', 1), ('bar', 2)");
         final ResultSet expected = query("SELECT * FROM SIMPLE_TABLE");
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
-        final Statement statement2 = connection.createStatement();
+        final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM SIMPLE_TABLE");
         assertThat(actual, matchesResultSet(expected));
     }
 
     @Test
     void testColumnsCounterMismatch() throws SQLException {
-        execute("CREATE TABLE COLUMN_COUNT_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
-        execute("INSERT INTO COLUMN_COUNT_MISMATCH VALUES ('foo', 1), ('bar', 2)");
-        execute("CREATE TABLE COLUMN_COUNT_MISMATCH_2(COL1 VARCHAR(20))");
-        execute("INSERT INTO COLUMN_COUNT_MISMATCH_2 VALUES ('foo'), ('bar')");
-        final ResultSet expected = query("SELECT * FROM COLUMN_COUNT_MISMATCH");
+        execute("CREATE TABLE COL_COUNT_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO COL_COUNT_MISMATCH VALUES ('foo', 1), ('bar', 2)");
+        execute("CREATE TABLE COL_COUNT_MISMATCH_2(COL1 VARCHAR(20))");
+        execute("INSERT INTO COL_COUNT_MISMATCH_2 VALUES ('foo'), ('bar')");
+        final ResultSet expected = query("SELECT * FROM COL_COUNT_MISMATCH");
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
-        final Statement statement2 = connection.createStatement();
-        final ResultSet actual = statement2.executeQuery("SELECT * FROM COLUMN_COUNT_MISMATCH_2");
+        final Statement statement2 = this.connection.createStatement();
+        final ResultSet actual = statement2.executeQuery("SELECT * FROM COL_COUNT_MISMATCH_2");
         final AssertionError error = assertThrows(AssertionError.class,
                 () -> assertThat(actual, matchesResultSet(expected)));
         assertThat(error.getMessage(), containsString("Expected: ResultSet with <2> column(s)\n" //
@@ -54,7 +54,7 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO ROW_COUNT_MISMATCH_2 VALUES ('foo', 1)");
         final ResultSet expected = query("SELECT * FROM ROW_COUNT_MISMATCH");
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
-        final Statement statement2 = connection.createStatement();
+        final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM ROW_COUNT_MISMATCH_2");
         final AssertionError error = assertThrows(AssertionError.class,
                 () -> assertThat(actual, matchesResultSet(expected)));
@@ -70,7 +70,7 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO VALUE_MISMATCH_2 VALUES ('foo', 1), ('bar', 100)");
         final ResultSet expected = query("SELECT * FROM VALUE_MISMATCH");
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
-        final Statement statement2 = connection.createStatement();
+        final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM VALUE_MISMATCH_2");
         final AssertionError error = assertThrows(AssertionError.class,
                 () -> assertThat(actual, matchesResultSet(expected)));
@@ -86,7 +86,7 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO DATA_TYPE_MISMATCH_2 VALUES ('foo', 1), ('bar', 2)");
         final ResultSet expected = query("SELECT * FROM DATA_TYPE_MISMATCH");
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
-        final Statement statement2 = connection.createStatement();
+        final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM DATA_TYPE_MISMATCH_2");
         final AssertionError error = assertThrows(AssertionError.class,
                 () -> assertThat(actual, matchesResultSet(expected)));
