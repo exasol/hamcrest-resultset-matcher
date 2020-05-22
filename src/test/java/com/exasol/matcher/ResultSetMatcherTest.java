@@ -20,9 +20,11 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
     }
 
     @Test
-    void testMatchSimpleResultSet() throws SQLException {
-        execute("CREATE TABLE SIMPLE_TABLE(COL1 VARCHAR(20), COL2 INTEGER)");
-        execute("INSERT INTO SIMPLE_TABLE VALUES ('foo', 1), ('bar', 2)");
+    void testMatchResultSet() throws SQLException {
+        execute("CREATE TABLE SIMPLE_TABLE(COL1 VARCHAR(20), COL2 INTEGER, COL3 BOOLEAN, COL4 TIMESTAMP)");
+        execute("INSERT INTO SIMPLE_TABLE VALUES " //
+                + "('foo', 1, true, '2020-01-01 23:03:20'), " //
+                + "('bar', 2, false, '1960-01-01 23:03:20')");
         final ResultSet expected = query("SELECT * FROM SIMPLE_TABLE");
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
         final Statement statement2 = this.connection.createStatement();
@@ -90,7 +92,7 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         final ResultSet actual = statement2.executeQuery("SELECT * FROM DATA_TYPE_MISMATCH_2");
         final AssertionError error = assertThrows(AssertionError.class,
                 () -> assertThat(actual, matchesResultSet(expected)));
-        assertThat(error.getMessage(), containsString("Expected: Column <2> with JDBC Data Type 12\n"
-                + "     but: Column <2> with JDBC Data Type 4"));
+        assertThat(error.getMessage(), containsString(
+                "Expected: Column <2> with JDBC Data Type 12\n" + "     but: Column <2> with JDBC Data Type 4"));
     }
 }
