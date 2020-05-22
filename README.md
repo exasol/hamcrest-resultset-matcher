@@ -21,6 +21,25 @@ SonarCloud results:
 
 This project provides [Hamcrest matcher](http://hamcrest.org/JavaHamcrest/) that compares JDBC result set (`java.sql.ResultSet`) against each other or against Java structures.
 
+# In a Nutshell
+
+```java
+import static com.exasol.matcher.ResultSetStructurMatcher.*;
+
+/...
+
+@Test
+void testCustomerTableContents() {
+    // Preparation: Create a JDBC statement and store the reference in variable 'statement'
+    
+    final ResulSet result = statement.execute("SELECT * FROM CUSTOMERS");
+    assertThat(result, table("INTEGER", "VARCHAR", "VARCHAR")
+            .row(1, "JOHN", "DOE")
+            .row(2, "JANE", "SMITH)
+            .matches());
+}
+```
+
 ## Features
 
 * Match two JDBC result sets
