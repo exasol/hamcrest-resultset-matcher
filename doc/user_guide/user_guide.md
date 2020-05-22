@@ -14,9 +14,9 @@ Please check out ["Introduction to the Dependency Mechanism"](http://maven.apach
 
 We assume here that you are familiar with the basics.
 
-### Exasol Test Containers as Maven Dependency
+### Hamcrest ResultSet Matcher as Maven Dependency
 
-Just add the following dependency to add the Exasol test containers to your project.
+Just add the following dependency to add the Hamcrest ResultSet Matcher to your project.
 
 ```xml
 <dependency>
@@ -29,7 +29,7 @@ Just add the following dependency to add the Exasol test containers to your proj
 
 As always, check for the latest version of the dependencies.
 
-## Matchers And Unit Test Frameworks
+## Matchers and Unit Test Frameworks
 
 Although checking a result set is by definition already an integration test (because you are testing the integration of your software with a database), you will most likely write the tests using a unit testing framework.
 
