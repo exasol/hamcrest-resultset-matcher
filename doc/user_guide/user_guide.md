@@ -57,7 +57,7 @@ Depending on your personal preferences or the use case for the test, you can pic
 
 ## The `ResultSetMatcher`
 
-This matcher allows you to compare two `ResultSet`'s. This can be helpful when you need, for example, to compare each value of two tables.
+This matcher allows you to compare two `ResultSet`s. This can be helpful when you need, for example, to compare each value of two tables.
 
 A minimal test would then look as in the example below.
 

@@ -69,7 +69,7 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
             expectedNext = this.expectedResultSet.next();
             actualNext = actualResultSet.next();
             this.rowCounter++;
-            if (!bothRowsExist(actualResultSet, expectedNext, actualNext))
+            if (!doBothRowsExist(actualResultSet, expectedNext, actualNext))
                 return false;
             if (expectedNext && !doesRowMatch(actualResultSet, expectedColumnCount)) {
                 return false;
@@ -88,17 +88,17 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         }
     }
 
-    private boolean bothRowsExist(final ResultSet actualResultSet, final boolean expectedNext, final boolean actualNext)
+    private boolean doBothRowsExist(final ResultSet actualResultSet, final boolean expectedNext, final boolean actualNext)
             throws SQLException {
         if (expectedNext != actualNext) {
             final int expectedRowCounter;
             final int actualRowCounter;
             if (expectedNext) {
-                expectedRowCounter = getRowCounter(rowCounter, this.expectedResultSet);
-                actualRowCounter = rowCounter - 1;
+                expectedRowCounter = getRowCounter(this.rowCounter, this.expectedResultSet);
+                actualRowCounter = this.rowCounter - 1;
             } else {
-                expectedRowCounter = rowCounter - 1;
-                actualRowCounter = getRowCounter(rowCounter, actualResultSet);
+                expectedRowCounter = this.rowCounter - 1;
+                actualRowCounter = getRowCounter(this.rowCounter, actualResultSet);
             }
             this.expectedDescription = "ResultSet with <" + expectedRowCounter + "> row(s)";
             this.actualDescription = "ResultSet with <" + actualRowCounter + "> row(s)";

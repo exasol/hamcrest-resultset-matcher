@@ -65,6 +65,22 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
     }
 
     @Test
+    void testRowCounterMismatch2() throws SQLException {
+        execute("CREATE TABLE ROW_COUNT_MORE_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO ROW_COUNT_MORE_MISMATCH VALUES ('foo', 1)");
+        execute("CREATE TABLE ROW_COUNT_MORE_MISMATCH_2(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO ROW_COUNT_MORE_MISMATCH_2 VALUES ('foo', 1), ('bar', 2)");
+        final ResultSet expected = query("SELECT * FROM ROW_COUNT_MORE_MISMATCH");
+        // Derby doesn't support two opened result sets on one statement, so we create one more statement.
+        final Statement statement2 = this.connection.createStatement();
+        final ResultSet actual = statement2.executeQuery("SELECT * FROM ROW_COUNT_MORE_MISMATCH_2");
+        final AssertionError error = assertThrows(AssertionError.class,
+                () -> assertThat(actual, matchesResultSet(expected)));
+        assertThat(error.getMessage(), containsString("Expected: ResultSet with <1> row(s)\n" //
+                + "     but: ResultSet with <2> row(s)"));
+    }
+
+    @Test
     void testValueMismatch() throws SQLException {
         execute("CREATE TABLE VALUE_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO VALUE_MISMATCH VALUES ('foo', 1), ('bar', 2)");
