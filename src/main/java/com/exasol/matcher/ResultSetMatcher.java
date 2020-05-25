@@ -1,11 +1,7 @@
 package com.exasol.matcher;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
@@ -16,8 +12,10 @@ import org.hamcrest.TypeSafeMatcher;
 public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     private static final int EXASOL_INTERVAL_DAY_TO_SECONDS = -104;
     private static final int EXASOL_INTERVAL_YEAR_TO_MONTHS = -103;
-    private final StringBuilder errorMessage = new StringBuilder();
     private final ResultSet expectedResultSet;
+    private String expectedDescription = "";
+    private String actualDescription = "";
+    private int rowCounter = 0;
 
     /**
      * Creates a new instance of {@link ResultSetMatcher}.
@@ -51,45 +49,76 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
 
     @Override
     protected void describeMismatchSafely(final ResultSet item, final Description mismatchDescription) {
-        mismatchDescription.appendText(this.errorMessage.toString());
-        super.describeMismatchSafely(item, mismatchDescription);
+        mismatchDescription.appendText(this.actualDescription);
     }
 
     @Override
     public void describeTo(final Description description) {
-        description.appendValue(this.expectedResultSet);
+        description.appendText(this.expectedDescription);
     }
 
     private boolean assertEqualResultSets(final ResultSet actualResultSet) throws SQLException {
         final int expectedColumnCount = this.expectedResultSet.getMetaData().getColumnCount();
         final int actualColumnCount = actualResultSet.getMetaData().getColumnCount();
-        if (expectedColumnCount != actualColumnCount) {
-            this.errorMessage.append("Column count doesn't match. Expected column count: ").append(expectedColumnCount);
-            this.errorMessage.append(", actual column count: ").append(actualColumnCount).append("\n");
+        if (!columnCounterMatches(expectedColumnCount, actualColumnCount)) {
             return false;
         }
         boolean expectedNext;
-        int rowCounter = 0;
+        boolean actualNext;
         do {
             expectedNext = this.expectedResultSet.next();
-            rowCounter++;
-            if ((expectedNext != actualResultSet.next())
-                    || (this.expectedResultSet.isLast() != actualResultSet.isLast())) {
-                this.errorMessage.append("Expected and actual result sets have different number of rows.\n");
+            actualNext = actualResultSet.next();
+            this.rowCounter++;
+            if (!doBothRowsExist(actualResultSet, expectedNext, actualNext))
                 return false;
-            }
             if (expectedNext && !doesRowMatch(actualResultSet, expectedColumnCount)) {
-                this.errorMessage.append(", row ").append(rowCounter).append(")\n");
                 return false;
             }
-        } while (expectedNext);
+        } while (actualNext);
         return true;
+    }
+
+    private boolean columnCounterMatches(final int expectedColumnCount, final int actualColumnCount) {
+        if (expectedColumnCount != actualColumnCount) {
+            this.expectedDescription = "ResultSet with <" + expectedColumnCount + "> column(s)";
+            this.actualDescription = "ResultSet with <" + actualColumnCount + "> column(s)";
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean doBothRowsExist(final ResultSet actualResultSet, final boolean expectedNext, final boolean actualNext)
+            throws SQLException {
+        if (expectedNext != actualNext) {
+            final int expectedRowCounter;
+            final int actualRowCounter;
+            if (expectedNext) {
+                expectedRowCounter = getRowCounter(this.rowCounter, this.expectedResultSet);
+                actualRowCounter = this.rowCounter - 1;
+            } else {
+                expectedRowCounter = this.rowCounter - 1;
+                actualRowCounter = getRowCounter(this.rowCounter, actualResultSet);
+            }
+            this.expectedDescription = "ResultSet with <" + expectedRowCounter + "> row(s)";
+            this.actualDescription = "ResultSet with <" + actualRowCounter + "> row(s)";
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private int getRowCounter(final int rowCounter, final ResultSet resultSet) throws SQLException {
+        int counter = rowCounter;
+        while (resultSet.next()) {
+            counter++;
+        }
+        return counter;
     }
 
     private boolean doesRowMatch(final ResultSet actualResultSet, final int expectedColumnCount) throws SQLException {
         for (int column = 1; column <= expectedColumnCount; ++column) {
             if (!doesFieldMatch(actualResultSet, column)) {
-                this.errorMessage.append(" (column ").append(column);
                 return false;
             }
         }
@@ -102,8 +131,8 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         if (resultSetTypeExpected == resultSetTypeActual) {
             return doesValueMatch(actualRow, column, resultSetTypeExpected);
         } else {
-            this.errorMessage.append("Data type does not match. Expected: ").append(resultSetTypeExpected);
-            this.errorMessage.append(", actual: ").append(resultSetTypeActual);
+            this.expectedDescription = "Column <" + column + "> with JDBC Data Type " + resultSetTypeExpected;
+            this.actualDescription = "Column <" + column + "> with JDBC Data Type " + resultSetTypeActual;
             return false;
         }
     }
@@ -139,70 +168,74 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
     private boolean doesTimestampMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Timestamp expected = this.expectedResultSet.getTimestamp(column);
         final Timestamp actual = actualRow.getTimestamp(column);
-        return doesObjectMatch("Timestamp", expected, actual);
+        return doesObjectMatch("Timestamp", expected, actual, column);
     }
 
     private boolean doesDateMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Date expected = this.expectedResultSet.getDate(column);
         final Date actual = actualRow.getDate(column);
-        return doesObjectMatch("Date", expected, actual);
+        return doesObjectMatch("Date", expected, actual, column);
     }
 
     private boolean doesDecimalMatch(final ResultSet actualRow, final int column) throws SQLException {
         final BigDecimal expected = this.expectedResultSet.getBigDecimal(column);
         final BigDecimal actual = actualRow.getBigDecimal(column);
-        return doesObjectMatch("BigDecimal", expected, actual);
+        return doesObjectMatch("BigDecimal", expected, actual, column);
     }
 
     private boolean doesBooleanMatch(final ResultSet actualRow, final int column) throws SQLException {
         final boolean expected = this.expectedResultSet.getBoolean(column);
         final boolean actual = actualRow.getBoolean(column);
-        return doesPrimitiveTypeMatch("Boolean", expected, actual);
+        return doesPrimitiveTypeMatch("Boolean", expected, actual, column);
     }
 
-    private <T> boolean doesPrimitiveTypeMatch(final String dataTypeName, final T expectedValue, final T actualValue) {
+    private <T> boolean doesPrimitiveTypeMatch(final String dataTypeName, final T expectedValue, final T actualValue,
+            final int column) {
         if (expectedValue == actualValue) {
             return true;
         } else {
             writeFieldValueMismatchErrorMessage(dataTypeName, String.valueOf(expectedValue),
-                    String.valueOf(actualValue));
+                    String.valueOf(actualValue), column);
             return false;
         }
     }
 
     private void writeFieldValueMismatchErrorMessage(final String valueType, final String expectedValue,
-            final String actualValue) {
-        this.errorMessage.append(valueType).append(" field value does not match. Expected: ").append(expectedValue);
-        this.errorMessage.append(", actual: ").append(actualValue);
+            final String actualValue, final int column) {
+        this.expectedDescription = valueType + " field value <" + expectedValue + ">" + " (column " + column + ", row "
+                + this.rowCounter + ")";
+        this.actualDescription = valueType + " field value <" + actualValue + ">" + " (column " + column + ", row "
+                + this.rowCounter + ")";
     }
 
     private boolean doesDoubleMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Double expected = this.expectedResultSet.getDouble(column);
         final Double actual = actualRow.getDouble(column);
-        return doesObjectMatch("Double", expected, actual);
+        return doesObjectMatch("Double", expected, actual, column);
     }
 
     private boolean doesIntegerMatch(final ResultSet actualRow, final int column) throws SQLException {
         final Integer expected = this.expectedResultSet.getInt(column);
         final Integer actual = actualRow.getInt(column);
-        return doesObjectMatch("Integer", expected, actual);
+        return doesObjectMatch("Integer", expected, actual, column);
     }
 
     private boolean doesStringMatch(final ResultSet actualRow, final int column) throws SQLException {
         final String expected = this.expectedResultSet.getString(column);
         final String actual = actualRow.getString(column);
-        return doesObjectMatch("String", expected, actual);
+        return doesObjectMatch("String", expected, actual, column);
     }
 
-    private <T> boolean doesObjectMatch(final String dataTypeName, final T expectedValue, final T actualValue) {
+    private <T> boolean doesObjectMatch(final String dataTypeName, final T expectedValue, final T actualValue,
+            final int column) {
         if ((expectedValue == null) || (actualValue == null)) {
-            return doesPrimitiveTypeMatch(dataTypeName, expectedValue, actualValue);
+            return doesPrimitiveTypeMatch(dataTypeName, expectedValue, actualValue, column);
         }
         if (expectedValue.equals(actualValue)) {
             return true;
         } else {
             writeFieldValueMismatchErrorMessage(dataTypeName, String.valueOf(expectedValue),
-                    String.valueOf(actualValue));
+                    String.valueOf(actualValue), column);
             return false;
         }
     }

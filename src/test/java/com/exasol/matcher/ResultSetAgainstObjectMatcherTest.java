@@ -6,25 +6,17 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
+import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ResultSetAgainstObjectMatcherTest {
-    private Statement statement;
-
+class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         final Connection connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
-        this.statement = connection.createStatement();
+        statement = connection.createStatement();
     }
 
     @Test
@@ -32,22 +24,6 @@ class ResultSetAgainstObjectMatcherTest {
         execute("CREATE TABLE SIMPLE(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO SIMPLE VALUES ('foo', 1), ('bar', 2)");
         assertThat(query("SELECT * FROM SIMPLE"), table().row("foo", 1).row("bar", 2).matches());
-    }
-
-    private void execute(final String sql) {
-        try {
-            this.statement.execute(sql);
-        } catch (final SQLException execption) {
-            throw new AssertionError("Unable to execute SQL statement: " + sql, execption);
-        }
-    }
-
-    private ResultSet query(final String sql) {
-        try {
-            return this.statement.executeQuery(sql);
-        } catch (final SQLException execption) {
-            throw new AssertionError("Unable to run query: " + sql, execption);
-        }
     }
 
     @Test
