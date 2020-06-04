@@ -142,7 +142,7 @@ assertThat(result,table("DECIMAL")
 
 That's very explicit. In fact it is probably a lot more explicit than you are comfortable with &mdash; especially if you want to compare a lot of rows.
 
-Enter fuzzy matching.
+This is where fuzzy matching comes into play.
 
 What you probably want to test is if the integer value 1234 matches the value of the first cell in row one and so on. To do this, you can instead formulate the following assertion:
 
