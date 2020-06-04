@@ -6,9 +6,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-import org.hamcrest.*;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +21,7 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         final Connection connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
-        statement = connection.createStatement();
+        this.statement = connection.createStatement();
     }
 
     @Test
@@ -57,11 +62,22 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
 
     @Test
     void testDetectCellValueMismatch() {
-        execute("CREATE TABLE CELL_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
-        execute("INSERT INTO CELL_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
-        assertQueryResultNotMatched("SELECT * FROM CELL_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
+        execute("CREATE TABLE CELL_VALUE_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO CELL_VALUE_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
+        assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
                 "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
-                        + " where content deviates starting row <2>, column <1> with value \"error_here\" instead of \"bar\"");
+                        + " where content deviates starting row <2>, column <1>" //
+                        + " with value \"error_here\" (java.lang.String) instead of \"bar\" (java.lang.String)");
+    }
+
+    @Test
+    void testDetectCellTypeMismatch() {
+        execute("CREATE TABLE CELL_TYPE_MISMATCH(COL1 VARCHAR(20), COL2 DECIMAL(2,0))");
+        execute("INSERT INTO CELL_TYPE_MISMATCH VALUES ('foo', 1), ('bar', 2)");
+        assertQueryResultNotMatched("SELECT * FROM CELL_TYPE_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
+                "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
+                        + " where content deviates starting row <1>, column <2>" //
+                        + " with value <1> (java.math.BigDecimal) instead of <1> (java.lang.Integer)");
     }
 
     @Test

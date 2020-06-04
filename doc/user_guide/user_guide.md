@@ -122,3 +122,43 @@ assertThat(result, table("INTEGER", "VARCHAR", "VARCHAR")
         .row(2, "JANE", "SMITH)
         .matches());
 ```
+
+
+### Fuzzy Matching
+
+The `ResultSetStructureMatcher` offers an optional fuzzy-matching mode. This allows you to be less strict when formulating your test cases.
+
+In the regular strict mode, the Java types in the result set and in the definition of your expectation must match exactly. While this can be what you want, there are also cases where exact matches are simply too much effort for what you actually want to test.
+
+Imagine a case where the result set contains a `DECIMAL(2,0)` column. The corresponding Java type is `BigDecimal`. So if you want to do a strict match, you need to say:
+
+```java
+assertThat(result,table("DECIMAL")
+        .row(BigDecimal.valueOf(1234))
+        .row(BigDecimal.valueOf(987654321)
+        // ...
+        .matches());
+```
+
+That's very explicit. In fact it is probably a lot more explicit than you are comfortable with &mdash; especially if you want to compare a lot of rows.
+
+This is where fuzzy matching comes into play.
+
+What you probably want to test is if the integer value 1234 matches the value of the first cell in row one and so on. To do this, you can instead formulate the following assertion:
+
+```java
+assertThat(result,
+        table("DECIMAL")
+        .row(1234)
+        .row(987654321)
+        // ...
+        .matchesFuzzily());
+```
+
+As you can see, it is a lot more compact and readable.
+
+Currently the `ResultSetStructureMatcher` supports the following fuzzy matches:
+
+* `BigDecimal`: `byte`, `short`, `int`, `long`, `float`, `double` (and corresponding [boxed types](https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html))
+
+In case no fuzzy match is known yet, the matcher falls back to strict matching. We will keep adding fuzzy matches over time.
