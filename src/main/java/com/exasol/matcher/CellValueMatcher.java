@@ -1,7 +1,7 @@
 package com.exasol.matcher;
 
 /**
- * Matcher for cell values
+ * Matcher for cell values.
  */
 interface CellMatcher {
     /**

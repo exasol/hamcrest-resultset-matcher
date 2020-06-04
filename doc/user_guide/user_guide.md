@@ -128,9 +128,9 @@ assertThat(result, table("INTEGER", "VARCHAR", "VARCHAR")
 
 The `ResultSetStructureMatcher` offers an optional fuzzy-matching mode. This allows you to be less strict when formulating your test cases.
 
-In the regular strict mode, the Java types in the result set and in the definition of your expectation must match exactly. While this can be what you want, there are also cases where exact matches are simply to much effort for what you actually want to test.
+In the regular strict mode, the Java types in the result set and in the definition of your expectation must match exactly. While this can be what you want, there are also cases where exact matches are simply too much effort for what you actually want to test.
 
-Imagine a case where the result set contains a `DECIMAL(2,0)` column. The corresponding java type is `BigDecimal`. So if you want to do a strict match, you need to say:
+Imagine a case where the result set contains a `DECIMAL(2,0)` column. The corresponding Java type is `BigDecimal`. So if you want to do a strict match, you need to say:
 
 ```java
 assertThat(result,table("DECIMAL")
@@ -161,4 +161,4 @@ Currently the `ResultSetStructureMatcher` supports the following fuzzy matches:
 
 * `BigDecimal`: `byte`, `short`, `int`, `long`, `float`, `double` (and corresponding [boxed types](https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html))
 
-In case now fuzzy match is known yet, the matcher falls back to strict matching. We will keep adding fuzzy matches over time.
+In case no fuzzy match is known yet, the matcher falls back to strict matching. We will keep adding fuzzy matches over time.
