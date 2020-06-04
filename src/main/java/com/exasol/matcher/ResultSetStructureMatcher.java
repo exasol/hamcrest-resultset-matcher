@@ -13,6 +13,10 @@ import org.hamcrest.TypeSafeMatcher;
 
 /**
  * Hamcrest matcher that compares JDBC result sets against Java object structures.
+ * <p>
+ * The matcher supports strict type matching and a fuzzy mode. In fuzzy mode it value matches are accepted if a the
+ * matcher knows how to convert between the expected type and the actual and the converted value matches.
+ * </p>
  */
 public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private final List<List<Object>> expectedTable;
@@ -23,10 +27,15 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private int deviationStartRow;
     private Object actualCellValue;
     private final List<Column> actualColumns = new ArrayList<>();
+    private String actualCellValueJavaType;
+    private final boolean fuzzy;
+    private final CellMatcher cellMatcher;
 
     private ResultSetStructureMatcher(final Builder builder) {
         this.expectedTable = builder.expectedTable;
         this.expectedColumns = builder.expectedColumns;
+        this.fuzzy = builder.fuzzy;
+        this.cellMatcher = this.fuzzy ? new FuzzyCellMatcher() : new StrictCellMatcher();
         this.contentDeviates = false;
     }
 
@@ -39,6 +48,9 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 .appendText(" columns");
         if (isAnyColumnDetailSpecified()) {
             description.appendList(" (", ", ", ")", this.expectedColumns);
+        }
+        if (this.fuzzy) {
+            description.appendText(" (fuzzy match)");
         }
     }
 
@@ -65,14 +77,20 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                     .appendList(" (", ", ", ")", this.actualColumns);
         }
         if (this.contentDeviates) {
+            final Object expectedValue = this.expectedTable.get(this.deviationStartRow - 1)
+                    .get(this.deviationStartColumn - 1);
             mismatchDescription.appendText(" where content deviates starting row ") //
                     .appendValue(this.deviationStartRow) //
                     .appendText(", column ") //
                     .appendValue(this.deviationStartColumn) //
                     .appendText(" with value ") //
                     .appendValue(this.actualCellValue) //
-                    .appendText(" instead of ") //
-                    .appendValue(this.expectedTable.get(this.deviationStartRow - 1).get(this.deviationStartColumn - 1));
+                    .appendText(" (") //
+                    .appendText(this.actualCellValueJavaType) //
+                    .appendText(") instead of ") //
+                    .appendValue(expectedValue) //
+                    .appendText(" (").appendText(expectedValue.getClass().getName()) //
+                    .appendText(")");
         }
     }
 
@@ -133,11 +151,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             for (final Object expectedValue : expectedRow) {
                 ++columnIndex;
                 final Object value = resultSet.getObject(columnIndex);
-                if (!value.equals(expectedValue)) {
-                    this.contentDeviates = true;
-                    this.deviationStartRow = rowIndex;
-                    this.deviationStartColumn = columnIndex;
-                    this.actualCellValue = value;
+                if (!matchCell(value, expectedValue, rowIndex, columnIndex)) {
                     return false;
                 }
             }
@@ -146,6 +160,20 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                     + columnIndex + ": " + exception.getMessage());
         }
         return true;
+    }
+
+    private boolean matchCell(final Object value, final Object expectedValue, final int rowIndex,
+            final int columnIndex) {
+        if (this.cellMatcher.match(value, expectedValue)) {
+            return true;
+        } else {
+            this.contentDeviates = true;
+            this.deviationStartRow = rowIndex;
+            this.deviationStartColumn = columnIndex;
+            this.actualCellValue = value;
+            this.actualCellValueJavaType = value.getClass().getName();
+            return false;
+        }
     }
 
     /**
@@ -180,6 +208,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private final List<List<Object>> expectedTable = new ArrayList<>();
         private int rows = 0;
         private List<Column> expectedColumns = null;
+        private boolean fuzzy = false;
 
         public Builder() {
         }
@@ -220,7 +249,22 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             }
         }
 
+        /**
+         * Create a new matcher that matches cell types strictly.
+         *
+         * @return matcher
+         */
         public Matcher<ResultSet> matches() {
+            return new ResultSetStructureMatcher(this);
+        }
+
+        /**
+         * Create a new matcher that matches cell types fuzzily.
+         *
+         * @return matcher
+         */
+        public Matcher<ResultSet> matchesFuzzily() {
+            this.fuzzy = true;
             return new ResultSetStructureMatcher(this);
         }
     }
