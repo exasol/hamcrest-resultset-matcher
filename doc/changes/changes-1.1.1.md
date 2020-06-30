@@ -1,4 +1,4 @@
-# Hamcrest ResultSet Matcher 1.1.1, released ??.06.2020
+# Hamcrest ResultSet Matcher 1.1.1, released 30.06.2020
 
 ## Features / Enhancements
 
