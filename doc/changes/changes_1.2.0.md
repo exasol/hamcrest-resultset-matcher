@@ -20,4 +20,5 @@ We also added a user guide, tests for both matchers, and enabled sonar scanning.
 * Updated `org.junit.jupiter:junit-jupiter-engine` from 5.6.2 to 5.7.0
 * Updated `org.junit.jupiter:junit-jupiter-params` from 5.6.2 to 5.7.0
 * Updated `org.junit.platform:junit-platform-runner` from 1.6.2 to 1.7.0
-* Updated `org.apache.maven.plugins:maven-surefire-plugin` from 3.0.0-M4 to 3.0.0-M5
+* Updated `org.jacoco:jacoco-maven-plugin` from 0.8.5 to 0.8.6
+* Updated `org.codehaus.mojo:versions-maven-plugin` from 2.7 to 2.8.1
