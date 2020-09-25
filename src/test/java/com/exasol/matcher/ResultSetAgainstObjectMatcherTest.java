@@ -122,8 +122,8 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
 
     @Test
     void testDetectCellValueFuzzyMismatch() {
-        execute("CREATE TABLE CELL_VALUE_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
-        execute("INSERT INTO CELL_VALUE_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
+        execute("CREATE TABLE CELL_VALUE_FUZZY_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO CELL_VALUE_FUZZY_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
         assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH",
                 table().row("foo", 1).row("bar", 2).matchesFuzzily(),
                 "ResultSet with <2> rows and <2> columns (fuzzy match)", //
