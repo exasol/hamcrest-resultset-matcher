@@ -2,7 +2,9 @@ package com.exasol.matcher;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -13,7 +15,6 @@ import java.sql.SQLException;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,6 +112,22 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
     @Test
     void testNestedDateMatcher() {
         assertThat(query("VALUES VARCHAR(CURRENT_DATE)"),
-                table().row(Matchers.matchesPattern("\\d{4}-\\d{2}-\\d{2}")).matches());
+                table().row(matchesPattern("\\d{4}-\\d{2}-\\d{2}")).matches());
+    }
+
+    @Test
+    void testNestedAnythingMatcher() {
+        assertThat(query("VALUES VARCHAR(CURRENT_DATE)"), table().row(anything()).matches());
+    }
+
+    @Test
+    void testDetectCellValueFuzzyMismatch() {
+        execute("CREATE TABLE CELL_VALUE_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO CELL_VALUE_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
+        assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH",
+                table().row("foo", 1).row("bar", 2).matchesFuzzily(),
+                "ResultSet with <2> rows and <2> columns (fuzzy match)", //
+                "ResultSet with <2> rows and <2> columns" //
+                        + " where content deviates starting row <2>, column <1>: \"bar\" (java.lang.String) was \"error_here\" (java.lang.String)");
     }
 }

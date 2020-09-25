@@ -77,4 +77,16 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
                 .appendText(this.expectedClass.getName()) //
                 .appendText(")");
     }
+
+    @Override
+    public void describeMismatch(final Object item, final Description description) {
+        description.appendValue(this.expected) //
+                .appendText(" (") //
+                .appendText(this.expectedClass.getName()) //
+                .appendText(") was ") //
+                .appendValue(item) //
+                .appendText(" (") //
+                .appendText(item.getClass().getName()) //
+                .appendText(")");
+    }
 }

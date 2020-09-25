@@ -162,3 +162,24 @@ Currently the `ResultSetStructureMatcher` supports the following fuzzy matches:
 * `BigDecimal`: `byte`, `short`, `int`, `long`, `float`, `double` (and corresponding [boxed types](https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html))
 
 In case no fuzzy match is known yet, the matcher falls back to strict matching. We will keep adding fuzzy matches over time.
+
+### Nesting Matchers
+
+Comparing result sets against tables full of constants is fine if the result is perfectly deterministic and you are actually interested in all results.
+
+Imagine a situation where you have an integration test with a random value column (e.g. a password salt). In a case like this you can check if the result has the right type and range, but not if the actual value is as expected.
+
+In the example below we have a table containing the following columns:
+
+1. user name
+1. randomly generated and encrypted password encoded as hexadecimal string of varying length
+1. numeric salt of arbitrary size, but never negative
+
+```java
+assertThat(result,
+        table()
+        .row("fred", matchesPattern("[0-9A-F]+"), greaterThanOrEqualTo(0))
+        .matches();
+```
+
+Of course you can nest matcher in the nested matcher. That's the beauty of hamcrest.
