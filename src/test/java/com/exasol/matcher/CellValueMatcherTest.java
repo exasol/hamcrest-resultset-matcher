@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,8 +85,18 @@ class CellValueMatcherTest extends AbstractResultSetMatcherTest {
     }
 
     @Test
+    void testFuzzyMismatchDecimalToFloat() {
+        assertTypeFuzzyMismatch("DECIMAL(20,1)", "27.3", 44.8f);
+    }
+
+    @Test
     void testFuzzyMatchDecimalToDouble() {
         assertTypeFuzzyMatch("DECIMAL(20,1)", "27.3", 27.3d);
+    }
+
+    @Test
+    void testFuzzyMismatchDecimalToDouble() {
+        assertTypeFuzzyMismatch("DECIMAL(20,1)", "27.3", 44.8d);
     }
 
     @Test
@@ -95,6 +106,66 @@ class CellValueMatcherTest extends AbstractResultSetMatcherTest {
 
     @Test
     void testFuzzyMatchDecimalWithFractionToLong() {
-        assertTypeFuzzyMismatch("DECIMAL(20,1)", "27.3", 27);
+        assertTypeFuzzyMismatch("DECIMAL(30,1)", "27.3", 27);
+    }
+
+    @Test
+    void testFuzzyMismatchDecimalDate() {
+        assertTypeFuzzyMismatch("DECIMAL(20,1)", "123456789012345678.0", new Date());
+
+    }
+
+    @Test
+    void testFuzzyMatchTwoStrings() {
+        assertTypeFuzzyMatch("VARCHAR(40)", "'a'", "a");
+    }
+
+    @Test
+    void testFuzzyMisatchTwoStrings() {
+        assertTypeFuzzyMatch("VARCHAR(40)", "'a'", "b");
+    }
+
+    @Test
+    void testFuzzyMatchStringAgainstCompatibleObject() {
+        final PseudoString stringAsObject = new PseudoString("text");
+        assertTypeFuzzyMatch("VARCHAR(20)", "'text'", stringAsObject);
+    }
+
+    private static final class PseudoString {
+        private final String value;
+
+        public PseudoString(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = (prime * result) + ((this.value == null) ? 0 : this.value.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final PseudoString other = (PseudoString) obj;
+            if (this.value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!this.value.equals(other.value)) {
+                return false;
+            }
+            return true;
+        }
     }
 }

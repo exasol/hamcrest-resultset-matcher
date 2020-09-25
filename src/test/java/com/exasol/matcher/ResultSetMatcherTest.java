@@ -2,13 +2,21 @@ package com.exasol.matcher;
 
 import static com.exasol.matcher.ResultSetMatcher.matchesResultSet;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThrows;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
+import org.hamcrest.Description;
+import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.MultipleFailuresError;
 
 class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
     private Connection connection;
@@ -42,10 +50,28 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
         final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM COL_COUNT_MISMATCH_2");
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> assertThat(actual, matchesResultSet(expected)));
-        assertThat(error.getMessage(), containsString("Expected: ResultSet with <2> column(s)\n" //
-                + "     but: ResultSet with <1> column(s)"));
+        assertMismatch(actual, expected, "ResultSet with <2> column(s)", "ResultSet with <1> column(s)");
+    }
+
+    private void assertMismatch(final ResultSet actual, final ResultSet expected, final String expectedDescription,
+            final String expectedMismatchDescription) throws MultipleFailuresError {
+        final ResultSetMatcher matcher = matchesResultSet(expected);
+        assertAll(() -> assertThat(actual, not(matcher)), //
+                () -> assertDescribeTo(matcher, expectedDescription), //
+                () -> assertDescribeMismatch(matcher, actual, expectedMismatchDescription));
+    }
+
+    private void assertDescribeTo(final ResultSetMatcher matcher, final String expectedDescription) {
+        final Description description = new StringDescription();
+        matcher.describeTo(description);
+        assertThat(description.toString(), equalTo(expectedDescription));
+    }
+
+    private void assertDescribeMismatch(final ResultSetMatcher matcher, final ResultSet actual,
+            final String expectedDescription) {
+        final Description description = new StringDescription();
+        matcher.describeMismatch(actual, description);
+        assertThat(description.toString(), equalTo(expectedDescription));
     }
 
     @Test
@@ -58,10 +84,7 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
         final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM ROW_COUNT_MISMATCH_2");
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> assertThat(actual, matchesResultSet(expected)));
-        assertThat(error.getMessage(), containsString("Expected: ResultSet with <2> row(s)\n" //
-                + "     but: ResultSet with <1> row(s)"));
+        assertMismatch(actual, expected, "ResultSet with <2> row(s)", "ResultSet with <1> row(s)");
     }
 
     @Test
@@ -74,10 +97,7 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
         final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM ROW_COUNT_MORE_MISMATCH_2");
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> assertThat(actual, matchesResultSet(expected)));
-        assertThat(error.getMessage(), containsString("Expected: ResultSet with <1> row(s)\n" //
-                + "     but: ResultSet with <2> row(s)"));
+        assertMismatch(actual, expected, "ResultSet with <1> row(s)", "ResultSet with <2> row(s)");
     }
 
     @Test
@@ -90,10 +110,8 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
         final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM VALUE_MISMATCH_2");
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> assertThat(actual, matchesResultSet(expected)));
-        assertThat(error.getMessage(), containsString("Expected: Integer field value <2> (column 2, row 2)\n"
-                + "     but: Integer field value <100> (column 2, row 2)"));
+        assertMismatch(actual, expected, "Integer field value <2> (column 2, row 2)",
+                "Integer field value <100> (column 2, row 2)");
     }
 
     @Test
@@ -106,9 +124,6 @@ class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
         // Derby doesn't support two opened result sets on one statement, so we create one more statement.
         final Statement statement2 = this.connection.createStatement();
         final ResultSet actual = statement2.executeQuery("SELECT * FROM DATA_TYPE_MISMATCH_2");
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> assertThat(actual, matchesResultSet(expected)));
-        assertThat(error.getMessage(), containsString(
-                "Expected: Column <2> with JDBC Data Type 12\n" + "     but: Column <2> with JDBC Data Type 4"));
+        assertMismatch(actual, expected, "Column <2> with JDBC Data Type 12", "Column <2> with JDBC Data Type 4");
     }
 }

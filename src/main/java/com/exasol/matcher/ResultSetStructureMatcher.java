@@ -1,5 +1,9 @@
 package com.exasol.matcher;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -9,6 +13,7 @@ import java.util.List;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeMatcher;
 
 /**
@@ -17,26 +22,54 @@ import org.hamcrest.TypeSafeMatcher;
  * The matcher supports strict type matching and a fuzzy mode. In fuzzy mode it value matches are accepted if a the
  * matcher knows how to convert between the expected type and the actual and the converted value matches.
  * </p>
+ *
+ * @param <T> Matcher type
  */
-public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
-    private final List<List<Object>> expectedTable;
+public class ResultSetStructureMatcher<T> extends TypeSafeMatcher<ResultSet> {
+    private final List<List<Matcher<? super T>>> expectedTable;
     private final List<Column> expectedColumns;
     private int actualRowCount;
     private boolean contentDeviates;
     private int deviationStartColumn;
     private int deviationStartRow;
-    private Object actualCellValue;
     private final List<Column> actualColumns = new ArrayList<>();
-    private String actualCellValueJavaType;
     private final boolean fuzzy;
-    private final CellMatcher cellMatcher;
+    private final Description cellDescription = new StringDescription();
+    private final Description cellMismatchDescription = new StringDescription();
 
     private ResultSetStructureMatcher(final Builder builder) {
-        this.expectedTable = builder.expectedTable;
         this.expectedColumns = builder.expectedColumns;
         this.fuzzy = builder.fuzzy;
-        this.cellMatcher = this.fuzzy ? new FuzzyCellMatcher() : new StrictCellMatcher();
         this.contentDeviates = false;
+        this.expectedTable = wrapExpectedValuesInMatchers(builder);
+    }
+
+    private List<List<Matcher<? super T>>> wrapExpectedValuesInMatchers(final Builder builder) {
+        final List<List<Matcher<? super T>>> tableOfMatchers = new ArrayList<>(builder.rows);
+        for (final List<Object> expectedRow : builder.expectedTable) {
+            final List<Matcher<? super T>> cellMatchers = wrapExpecteRowInMatchers(expectedRow);
+            tableOfMatchers.add(cellMatchers);
+        }
+        return tableOfMatchers;
+    }
+
+    private List<Matcher<? super T>> wrapExpecteRowInMatchers(final List<Object> expectedRow) {
+        final List<Matcher<? super T>> rowOfMatchers = new ArrayList<>(expectedRow.size());
+        for (final Object expectedCellValue : expectedRow) {
+            if (expectedCellValue instanceof Matcher<?>) {
+                rowOfMatchers.add(castToMatcher(expectedCellValue));
+            } else if (this.fuzzy) {
+                rowOfMatchers.add(FuzzyCellMatcher.fuzzilyEqualTo(expectedCellValue));
+            } else {
+                rowOfMatchers.add(allOf(instanceOf(expectedCellValue.getClass()), equalTo(expectedCellValue)));
+            }
+        }
+        return rowOfMatchers;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Matcher<? super T> castToMatcher(final Object expectedCellValue) {
+        return (Matcher<? super T>) expectedCellValue;
     }
 
     @Override
@@ -77,20 +110,12 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                     .appendList(" (", ", ", ")", this.actualColumns);
         }
         if (this.contentDeviates) {
-            final Object expectedValue = this.expectedTable.get(this.deviationStartRow - 1)
-                    .get(this.deviationStartColumn - 1);
             mismatchDescription.appendText(" where content deviates starting row ") //
                     .appendValue(this.deviationStartRow) //
                     .appendText(", column ") //
                     .appendValue(this.deviationStartColumn) //
-                    .appendText(" with value ") //
-                    .appendValue(this.actualCellValue) //
-                    .appendText(" (") //
-                    .appendText(this.actualCellValueJavaType) //
-                    .appendText(") instead of ") //
-                    .appendValue(expectedValue) //
-                    .appendText(" (").appendText(expectedValue.getClass().getName()) //
-                    .appendText(")");
+                    .appendText(": ") //
+                    .appendText(this.cellMismatchDescription.toString());
         }
     }
 
@@ -99,7 +124,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         boolean ok = matchColumns(resultSet);
         try {
             int rowIndex = 0;
-            for (final List<Object> expectedRow : this.expectedTable) {
+            for (final List<Matcher<? super T>> expectedRow : this.expectedTable) {
                 if (resultSet.next()) {
                     ++rowIndex;
                     ok = ok && matchValuesInRowMatch(resultSet, rowIndex, expectedRow);
@@ -145,10 +170,10 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private boolean matchValuesInRowMatch(final ResultSet resultSet, final int rowIndex,
-            final List<Object> expectedRow) {
+            final List<Matcher<? super T>> expectedRow) {
         int columnIndex = 0;
         try {
-            for (final Object expectedValue : expectedRow) {
+            for (final Matcher<? super T> expectedValue : expectedRow) {
                 ++columnIndex;
                 final Object value = resultSet.getObject(columnIndex);
                 if (!matchCell(value, expectedValue, rowIndex, columnIndex)) {
@@ -162,16 +187,16 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         return true;
     }
 
-    private boolean matchCell(final Object value, final Object expectedValue, final int rowIndex,
+    private boolean matchCell(final Object value, final Matcher<? super T> cellMatcher, final int rowIndex,
             final int columnIndex) {
-        if (this.cellMatcher.match(value, expectedValue)) {
+        if (cellMatcher.matches(value)) {
             return true;
         } else {
             this.contentDeviates = true;
             this.deviationStartRow = rowIndex;
             this.deviationStartColumn = columnIndex;
-            this.actualCellValue = value;
-            this.actualCellValueJavaType = value.getClass().getName();
+            cellMatcher.describeTo(this.cellDescription);
+            cellMatcher.describeMismatch(value, this.cellMismatchDescription);
             return false;
         }
     }
@@ -202,7 +227,6 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
 
     /**
      * Builder for {@link ResultSetStructureMatcher} objects.
-     *
      */
     public static final class Builder {
         private final List<List<Object>> expectedTable = new ArrayList<>();
@@ -255,7 +279,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          * @return matcher
          */
         public Matcher<ResultSet> matches() {
-            return new ResultSetStructureMatcher(this);
+            return new ResultSetStructureMatcher<>(this);
         }
 
         /**
@@ -265,7 +289,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          */
         public Matcher<ResultSet> matchesFuzzily() {
             this.fuzzy = true;
-            return new ResultSetStructureMatcher(this);
+            return new ResultSetStructureMatcher<>(this);
         }
     }
 }
