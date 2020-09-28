@@ -23,9 +23,9 @@ import org.hamcrest.TypeSafeMatcher;
  * matcher knows how to convert between the expected type and the actual and the converted value matches.
  * </p>
  *
- * @param <T> Matcher type
+ * @param <T> {@link java.sql.ResultSet} or derived type
  */
-public class ResultSetStructureMatcher<T> extends TypeSafeMatcher<ResultSet> {
+public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatcher<ResultSet> {
     private final List<List<Matcher<? super T>>> expectedTable;
     private final List<Column> expectedColumns;
     private int actualRowCount;

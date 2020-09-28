@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 
-class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
+class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         final Connection connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
