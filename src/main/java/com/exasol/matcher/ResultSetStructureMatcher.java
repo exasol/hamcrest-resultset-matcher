@@ -24,7 +24,7 @@ import org.hamcrest.TypeSafeMatcher;
  * </p>
  */
 public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
-    private final List<List<Matcher<?>>> expectedTable;
+    private final List<List<Matcher<?>>> cellMatcherTable;
     private final List<Column> expectedColumns;
     private int actualRowCount;
     private boolean contentDeviates;
@@ -39,7 +39,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         this.expectedColumns = builder.expectedColumns;
         this.fuzzy = builder.fuzzy;
         this.contentDeviates = false;
-        this.expectedTable = wrapExpectedValuesInMatchers(builder);
+        this.cellMatcherTable = wrapExpectedValuesInMatchers(builder);
     }
 
     private List<List<Matcher<?>>> wrapExpectedValuesInMatchers(final Builder builder) {
@@ -72,7 +72,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     @Override
     public void describeTo(final Description description) {
         description.appendText("ResultSet with ") //
-                .appendValue(this.expectedTable.size()) //
+                .appendValue(this.cellMatcherTable.size()) //
                 .appendText(" rows and ") //
                 .appendValue(getExpectedColumnCount()) //
                 .appendText(" columns");
@@ -121,7 +121,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         boolean ok = matchColumns(resultSet);
         try {
             int rowIndex = 0;
-            for (final List<Matcher<?>> expectedRow : this.expectedTable) {
+            for (final List<Matcher<?>> expectedRow : this.cellMatcherTable) {
                 if (resultSet.next()) {
                     ++rowIndex;
                     ok = ok && matchValuesInRowMatch(resultSet, rowIndex, expectedRow);
