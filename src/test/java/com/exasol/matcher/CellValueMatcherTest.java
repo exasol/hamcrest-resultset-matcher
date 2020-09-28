@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Date;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,8 +85,18 @@ class CellValueMatcherTest extends AbstractResultSetMatcherTest {
     }
 
     @Test
+    void testFuzzyMismatchDecimalToFloat() {
+        assertTypeFuzzyMismatch("DECIMAL(20,1)", "27.3", 44.8f);
+    }
+
+    @Test
     void testFuzzyMatchDecimalToDouble() {
         assertTypeFuzzyMatch("DECIMAL(20,1)", "27.3", 27.3d);
+    }
+
+    @Test
+    void testFuzzyMismatchDecimalToDouble() {
+        assertTypeFuzzyMismatch("DECIMAL(20,1)", "27.3", 44.8d);
     }
 
     @Test
@@ -95,6 +106,22 @@ class CellValueMatcherTest extends AbstractResultSetMatcherTest {
 
     @Test
     void testFuzzyMatchDecimalWithFractionToLong() {
-        assertTypeFuzzyMismatch("DECIMAL(20,1)", "27.3", 27);
+        assertTypeFuzzyMismatch("DECIMAL(30,1)", "27.3", 27);
+    }
+
+    @Test
+    void testFuzzyMismatchDecimalDate() {
+        assertTypeFuzzyMismatch("DECIMAL(20,1)", "123456789012345678.0", new Date());
+
+    }
+
+    @Test
+    void testFuzzyMatchTwoStrings() {
+        assertTypeFuzzyMatch("VARCHAR(40)", "'a'", "a");
+    }
+
+    @Test
+    void testFuzzyMisatchTwoStrings() {
+        assertTypeFuzzyMismatch("VARCHAR(40)", "'a'", "b");
     }
 }

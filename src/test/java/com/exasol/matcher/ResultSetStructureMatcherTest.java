@@ -2,7 +2,9 @@ package com.exasol.matcher;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -17,7 +19,9 @@ import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
+import com.exasol.matcher.ResultSetStructureMatcher.Builder;
+
+class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         final Connection connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
@@ -66,8 +70,7 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO CELL_VALUE_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
         assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
                 "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
-                        + " where content deviates starting row <2>, column <1>" //
-                        + " with value \"error_here\" (java.lang.String) instead of \"bar\" (java.lang.String)");
+                        + " where content deviates starting row <2>, column <1>: \"bar\" was \"error_here\"");
     }
 
     @Test
@@ -76,13 +79,14 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO CELL_TYPE_MISMATCH VALUES ('foo', 1), ('bar', 2)");
         assertQueryResultNotMatched("SELECT * FROM CELL_TYPE_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
                 "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
-                        + " where content deviates starting row <1>, column <2>" //
-                        + " with value <1> (java.math.BigDecimal) instead of <1> (java.lang.Integer)");
+                        + " where content deviates starting row <1>, column <2>: " //
+                        + "an instance of java.lang.Integer <1> is a java.math.BigDecimal");
     }
 
     @Test
     void testDetectColumnCountMismatchDuringRowDefinition() {
-        final AssertionError error = assertThrows(AssertionError.class, () -> table().row("foo").row("bar", 1));
+        final Builder table = table().row("foo");
+        final AssertionError error = assertThrows(AssertionError.class, () -> table.row("bar", 1));
         assertThat(error.getMessage(), equalTo("Error constructing expected row 2. Expected 1 columns, but got 2."));
     }
 
@@ -103,5 +107,27 @@ class ResultSetAgainstObjectMatcherTest extends AbstractResultSetMatcherTest {
                 table("VARCHAR", "INTEGER", "DATE").row("foo", 1, true).row("bar", 2, false).matches(),
                 "ResultSet with <2> rows and <3> columns (VARCHAR, INTEGER, DATE)",
                 "ResultSet with <2> rows and <3> columns (VARCHAR, INTEGER, BOOLEAN)");
+    }
+
+    @Test
+    void testNestedDateMatcher() {
+        assertThat(query("VALUES VARCHAR(CURRENT_DATE)"),
+                table().row(matchesPattern("\\d{4}-\\d{2}-\\d{2}")).matches());
+    }
+
+    @Test
+    void testNestedAnythingMatcher() {
+        assertThat(query("VALUES VARCHAR(CURRENT_DATE)"), table().row(anything()).matches());
+    }
+
+    @Test
+    void testDetectCellValueFuzzyMismatch() {
+        execute("CREATE TABLE CELL_VALUE_FUZZY_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
+        execute("INSERT INTO CELL_VALUE_FUZZY_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
+        assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH",
+                table().row("foo", 1).row("bar", 2).matchesFuzzily(),
+                "ResultSet with <2> rows and <2> columns (fuzzy match)", //
+                "ResultSet with <2> rows and <2> columns" //
+                        + " where content deviates starting row <2>, column <1>: \"bar\" (java.lang.String) was \"error_here\" (java.lang.String)");
     }
 }
