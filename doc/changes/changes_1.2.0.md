@@ -1,4 +1,4 @@
-# hamcrest-resulset-matcher 1.2.0, released 2020-09-25
+# hamcrest-resulset-matcher 1.2.0, released 2020-XX-XX
  
 Code name: Nested Matchers
  

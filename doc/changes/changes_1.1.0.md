@@ -1,4 +1,4 @@
-# hamcrest-resulset-matcher 1.0.0, released 2020-07-04
+# hamcrest-resulset-matcher 1.1.0, released 2020-07-04
  
 Code name: Added matching against Java structures and user guide
  
