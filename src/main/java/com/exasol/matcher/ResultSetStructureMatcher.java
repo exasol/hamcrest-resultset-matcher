@@ -22,11 +22,9 @@ import org.hamcrest.TypeSafeMatcher;
  * The matcher supports strict type matching and a fuzzy mode. In fuzzy mode it value matches are accepted if a the
  * matcher knows how to convert between the expected type and the actual and the converted value matches.
  * </p>
- *
- * @param <T> {@link java.sql.ResultSet} or derived type
  */
-public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatcher<ResultSet> {
-    private final List<List<Matcher<? super T>>> expectedTable;
+public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
+    private final List<List<Matcher<?>>> expectedTable;
     private final List<Column> expectedColumns;
     private int actualRowCount;
     private boolean contentDeviates;
@@ -44,17 +42,17 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
         this.expectedTable = wrapExpectedValuesInMatchers(builder);
     }
 
-    private List<List<Matcher<? super T>>> wrapExpectedValuesInMatchers(final Builder builder) {
-        final List<List<Matcher<? super T>>> tableOfMatchers = new ArrayList<>(builder.rows);
+    private List<List<Matcher<?>>> wrapExpectedValuesInMatchers(final Builder builder) {
+        final List<List<Matcher<?>>> tableOfMatchers = new ArrayList<>(builder.rows);
         for (final List<Object> expectedRow : builder.expectedTable) {
-            final List<Matcher<? super T>> cellMatchers = wrapExpecteRowInMatchers(expectedRow);
+            final List<Matcher<?>> cellMatchers = wrapExpecteRowInMatchers(expectedRow);
             tableOfMatchers.add(cellMatchers);
         }
         return tableOfMatchers;
     }
 
-    private List<Matcher<? super T>> wrapExpecteRowInMatchers(final List<Object> expectedRow) {
-        final List<Matcher<? super T>> rowOfMatchers = new ArrayList<>(expectedRow.size());
+    private List<Matcher<?>> wrapExpecteRowInMatchers(final List<Object> expectedRow) {
+        final List<Matcher<?>> rowOfMatchers = new ArrayList<>(expectedRow.size());
         for (final Object expectedCellValue : expectedRow) {
             if (expectedCellValue instanceof Matcher<?>) {
                 rowOfMatchers.add(castToMatcher(expectedCellValue));
@@ -67,9 +65,8 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
         return rowOfMatchers;
     }
 
-    @SuppressWarnings("unchecked")
-    private Matcher<? super T> castToMatcher(final Object expectedCellValue) {
-        return (Matcher<? super T>) expectedCellValue;
+    private Matcher<?> castToMatcher(final Object expectedCellValue) {
+        return (Matcher<?>) expectedCellValue;
     }
 
     @Override
@@ -124,7 +121,7 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
         boolean ok = matchColumns(resultSet);
         try {
             int rowIndex = 0;
-            for (final List<Matcher<? super T>> expectedRow : this.expectedTable) {
+            for (final List<Matcher<?>> expectedRow : this.expectedTable) {
                 if (resultSet.next()) {
                     ++rowIndex;
                     ok = ok && matchValuesInRowMatch(resultSet, rowIndex, expectedRow);
@@ -170,10 +167,10 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
     }
 
     private boolean matchValuesInRowMatch(final ResultSet resultSet, final int rowIndex,
-            final List<Matcher<? super T>> expectedRow) {
+            final List<Matcher<?>> expectedRow) {
         int columnIndex = 0;
         try {
-            for (final Matcher<? super T> expectedValue : expectedRow) {
+            for (final Matcher<?> expectedValue : expectedRow) {
                 ++columnIndex;
                 final Object value = resultSet.getObject(columnIndex);
                 if (!matchCell(value, expectedValue, rowIndex, columnIndex)) {
@@ -187,7 +184,7 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
         return true;
     }
 
-    private boolean matchCell(final Object value, final Matcher<? super T> cellMatcher, final int rowIndex,
+    private boolean matchCell(final Object value, final Matcher<?> cellMatcher, final int rowIndex,
             final int columnIndex) {
         if (cellMatcher.matches(value)) {
             return true;
@@ -279,7 +276,7 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
          * @return matcher
          */
         public Matcher<ResultSet> matches() {
-            return new ResultSetStructureMatcher<>(this);
+            return new ResultSetStructureMatcher(this);
         }
 
         /**
@@ -289,7 +286,7 @@ public class ResultSetStructureMatcher<T extends ResultSet> extends TypeSafeMatc
          */
         public Matcher<ResultSet> matchesFuzzily() {
             this.fuzzy = true;
-            return new ResultSetStructureMatcher<>(this);
+            return new ResultSetStructureMatcher(this);
         }
     }
 }
