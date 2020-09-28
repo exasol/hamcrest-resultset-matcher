@@ -121,7 +121,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         boolean ok = matchColumns(resultSet);
         try {
             int rowIndex = 0;
-            for (final List<Matcher<?>> expectedRow : this.cellMatcherTable) {
+            for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
                 if (resultSet.next()) {
                     ++rowIndex;
                     ok = ok && matchValuesInRowMatch(resultSet, rowIndex, expectedRow);
@@ -167,10 +167,10 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private boolean matchValuesInRowMatch(final ResultSet resultSet, final int rowIndex,
-            final List<Matcher<?>> expectedRow) {
+            final List<Matcher<?>> cellMatcherRow) {
         int columnIndex = 0;
         try {
-            for (final Matcher<?> expectedValue : expectedRow) {
+            for (final Matcher<?> cellMatcher : expectedRow) {
                 ++columnIndex;
                 final Object value = resultSet.getObject(columnIndex);
                 if (!matchCell(value, expectedValue, rowIndex, columnIndex)) {
