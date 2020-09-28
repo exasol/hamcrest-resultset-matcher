@@ -124,7 +124,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
                 if (resultSet.next()) {
                     ++rowIndex;
-                    ok = ok && matchValuesInRowMatch(resultSet, rowIndex, expectedRow);
+                    ok = ok && matchValuesInRowMatch(resultSet, rowIndex, cellMatcherRow);
                 } else {
                     ok = false;
                 }
@@ -170,10 +170,10 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             final List<Matcher<?>> cellMatcherRow) {
         int columnIndex = 0;
         try {
-            for (final Matcher<?> cellMatcher : expectedRow) {
+            for (final Matcher<?> cellMatcher : cellMatcherRow) {
                 ++columnIndex;
                 final Object value = resultSet.getObject(columnIndex);
-                if (!matchCell(value, expectedValue, rowIndex, columnIndex)) {
+                if (!matchCell(value, cellMatcher, rowIndex, columnIndex)) {
                     return false;
                 }
             }
