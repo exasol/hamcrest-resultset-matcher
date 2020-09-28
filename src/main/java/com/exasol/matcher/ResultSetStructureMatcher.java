@@ -1,8 +1,6 @@
 package com.exasol.matcher;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -56,6 +54,8 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         for (final Object expectedCellValue : expectedRow) {
             if (expectedCellValue instanceof Matcher<?>) {
                 rowOfMatchers.add(castToMatcher(expectedCellValue));
+            } else if (expectedCellValue == null) {
+                rowOfMatchers.add(is(nullValue()));
             } else if (this.fuzzy) {
                 rowOfMatchers.add(FuzzyCellMatcher.fuzzilyEqualTo(expectedCellValue));
             } else {

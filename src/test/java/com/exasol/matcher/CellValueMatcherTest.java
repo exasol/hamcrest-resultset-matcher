@@ -32,6 +32,16 @@ class CellValueMatcherTest extends AbstractResultSetMatcherTest {
         assertTypeStrictMatch("INTEGER", "1001", 1001);
     }
 
+    @Test
+    void testMatchNull() {
+        assertTypeStrictMatch("VARCHAR(39)", "NULL", null);
+    }
+
+    @Test
+    void testNotMatchNull() {
+        assertThrows(AssertionError.class, () -> assertTypeStrictMatch("VARCHAR(38)", "'test'", null));
+    }
+
     private void assertTypeStrictMatch(final String columnType, final String actualValueSql,
             final Object expectedValue) {
         assertTypeMatch(columnType, actualValueSql, expectedValue, false);
