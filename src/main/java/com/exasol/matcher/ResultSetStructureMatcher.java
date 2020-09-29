@@ -55,7 +55,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             if (expectedCellValue instanceof Matcher<?>) {
                 rowOfMatchers.add(castToMatcher(expectedCellValue));
             } else if (expectedCellValue == null) {
-                rowOfMatchers.add(is(nullValue()));
+                rowOfMatchers.add(nullValue());
             } else if (this.fuzzy) {
                 rowOfMatchers.add(FuzzyCellMatcher.fuzzilyEqualTo(expectedCellValue));
             } else {
