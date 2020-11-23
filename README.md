@@ -75,6 +75,8 @@ Running the Hamcrest ResultSet Matcher requires a Java Runtime version 11 or lat
 |-------------------------------------------------------------------------------------|--------------------------------------------------------|-------------------------------|
 | [Apache Derby](https://db.apache.org/derby/)                                        | Integration tests against real JDBC result sets        | Apache License 2.0            |
 | [JUnit](https://junit.org/junit5)                                                   | Unit testing framework                                 | Eclipse Public License 1.0    |
+| [Exasol Testcontainers][exasol-testcontainers]                                      | Exasol extension for the Testcontainers framework      | MIT License                   |
+| [Testcontainers](https://www.testcontainers.org/)                                   | Container-based integration tests                      | MIT License                   |
 
 ### Maven Plug-ins
 
@@ -87,8 +89,10 @@ Running the Hamcrest ResultSet Matcher requires a Java Runtime version 11 or lat
 | [Maven Javadoc Plugin][maven-javadoc-plugin]                             | Creating a Javadoc JAR                                 | Apache License 2.0            |
 | [Maven Source Plugin][maven-source-plugin]                               | Creating a source code JAR                             | Apache License 2.0            |
 | [Maven Surefire Plugin][maven-surefire-plugin]                           | Unit testing                                           | Apache License 2.0            |
+| [Maven Failsafe Plugin][maven-failsafe-plugin]                           | Integration testing                                    | Apache License 2.0            |
 | [Sonatype OSS Index Maven Plugin][sonatype-oss-index-maven-plugin]       | Checking Dependencies Vulnerability                    | ASL2                          |
 | [Versions Maven Plugin][versions-maven-plugin]                           | Checking if dependencies updates are available         | Apache License 2.0            |
+  [Exasol Project Keeper][project-keeper]                                  | Unifying project structure                             | MIT License                   |
 
 # License
 
@@ -102,3 +106,6 @@ This software is licensed under the [MIT license](LICENSE).
 [maven-surefire-plugin]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [sonatype-oss-index-maven-plugin]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
+[maven-failsafe-plugin]: https://maven.apache.org/surefire/maven-surefire-plugin/
+[project-keeper]: https://github.com/exasol/project-keeper-maven-plugin
+[exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
