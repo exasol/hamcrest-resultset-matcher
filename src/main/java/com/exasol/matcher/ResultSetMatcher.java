@@ -88,8 +88,8 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
         }
     }
 
-    private boolean doBothRowsExist(final ResultSet actualResultSet, final boolean expectedNext, final boolean actualNext)
-            throws SQLException {
+    private boolean doBothRowsExist(final ResultSet actualResultSet, final boolean expectedNext,
+            final boolean actualNext) throws SQLException {
         if (expectedNext != actualNext) {
             final int expectedRowCounter;
             final int actualRowCounter;
@@ -232,7 +232,11 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
             return doesPrimitiveTypeMatch(dataTypeName, expectedValue, actualValue, column);
         }
         if (expectedValue.equals(actualValue)) {
-            return true;
+            if (expectedValue.getClass().equals(BigDecimal.class) && actualValue.getClass().equals(BigDecimal.class)) {
+                return ((BigDecimal) expectedValue).compareTo((BigDecimal) actualValue) == 0;
+            } else {
+                return expectedValue.equals(actualValue);
+            }
         } else {
             writeFieldValueMismatchErrorMessage(dataTypeName, String.valueOf(expectedValue),
                     String.valueOf(actualValue), column);

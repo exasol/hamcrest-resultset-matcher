@@ -1,8 +1,10 @@
 package com.exasol.matcher;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-public class AbstractResultSetMatcherTest {
+public abstract class AbstractResultSetMatcherTest {
     protected Statement statement;
 
     protected void execute(final String sql) {
