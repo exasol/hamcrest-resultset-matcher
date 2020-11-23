@@ -148,6 +148,11 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
     }
 
     @Test
+    void testFuzzyMatchDecimalWithFractionToLongWithCeil() {
+        assertTypeFuzzyMismatch("DECIMAL(30,1)", "26.8", 27);
+    }
+
+    @Test
     void testFuzzyMismatchDecimalDate() {
         assertTypeFuzzyMismatch("DECIMAL(20,1)", "123456789012345678.0", new Date());
 

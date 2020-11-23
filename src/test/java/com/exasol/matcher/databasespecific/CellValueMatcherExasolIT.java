@@ -3,16 +3,14 @@ package com.exasol.matcher.databasespecific;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.exasol.containers.ExasolContainer;
 import com.exasol.matcher.AbstractCellValueMatcherTest;
 
+@Tag("integration")
 @Testcontainers
 class CellValueMatcherExasolIT extends AbstractCellValueMatcherTest {
 

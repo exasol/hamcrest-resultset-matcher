@@ -232,11 +232,7 @@ public final class ResultSetMatcher extends TypeSafeMatcher<ResultSet> {
             return doesPrimitiveTypeMatch(dataTypeName, expectedValue, actualValue, column);
         }
         if (expectedValue.equals(actualValue)) {
-            if (expectedValue.getClass().equals(BigDecimal.class) && actualValue.getClass().equals(BigDecimal.class)) {
-                return ((BigDecimal) expectedValue).compareTo((BigDecimal) actualValue) == 0;
-            } else {
-                return expectedValue.equals(actualValue);
-            }
+            return expectedValue.equals(actualValue);
         } else {
             writeFieldValueMismatchErrorMessage(dataTypeName, String.valueOf(expectedValue),
                     String.valueOf(actualValue), column);
