@@ -2,17 +2,10 @@ package com.exasol.matcher;
 
 import static org.hamcrest.Matchers.*;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.*;
 
 /**
  * Hamcrest matcher that compares JDBC result sets against Java object structures.
@@ -215,11 +208,11 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
      * @return Builder instance
      */
     public static Builder table(final String... types) {
-        final List<Column> expectedColumns = new ArrayList<>(types.length);
+        final Builder builder = new Builder();
         for (final String type : types) {
-            expectedColumns.add(Column.column(type));
+            builder.addExpectedColumn(Column.column(type));
         }
-        return new Builder(expectedColumns);
+        return builder;
     }
 
     /**
@@ -228,14 +221,14 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     public static final class Builder {
         private final List<List<Object>> expectedTable = new ArrayList<>();
         private int rows = 0;
-        private List<Column> expectedColumns = null;
+        private List<Column> expectedColumns = new ArrayList<>();
         private boolean fuzzy = false;
 
         public Builder() {
         }
 
-        public Builder(final List<Column> expectedColumns) {
-            this.expectedColumns = expectedColumns;
+        public void addExpectedColumn(final Column expectedColumn) {
+            this.expectedColumns.add(expectedColumn);
         }
 
         /**
@@ -247,7 +240,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         public Builder row(final Object... cellValues) {
             ++this.rows;
             final int length = cellValues.length;
-            if (this.expectedColumns == null) {
+            if (this.expectedColumns.isEmpty()) {
                 setColumnCountExpectation(length);
             } else {
                 validateColumnCount(length);

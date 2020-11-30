@@ -2,20 +2,13 @@ package com.exasol.matcher;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anything;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.StringDescription;
+import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -129,5 +122,12 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
                 "ResultSet with <2> rows and <2> columns (fuzzy match)", //
                 "ResultSet with <2> rows and <2> columns" //
                         + " where content deviates starting row <2>, column <1>: \"bar\" (java.lang.String) was \"error_here\" (java.lang.String)");
+    }
+
+    @Test
+    void testResultSetMatcherWithNoColumns() {
+        execute("CREATE TABLE SIMPLE_TABLE(COL1 VARCHAR(20))");
+        final ResultSet expected = query("SELECT * FROM SIMPLE_TABLE");
+        assertFalse(table().matches().matches(expected));
     }
 }
