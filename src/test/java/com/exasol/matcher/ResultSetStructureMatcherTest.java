@@ -126,8 +126,8 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
 
     @Test
     void testResultSetMatcherWithNoColumns() {
-        execute("CREATE TABLE SIMPLE_TABLE(COL1 VARCHAR(20))");
-        final ResultSet expected = query("SELECT * FROM SIMPLE_TABLE");
+        execute("CREATE TABLE SIMPLE_TABLE_ONE_COLUMN(COL1 VARCHAR(20))");
+        final ResultSet expected = query("SELECT * FROM SIMPLE_TABLE_ONE_COLUMN");
         assertFalse(table().matches().matches(expected));
     }
 }
