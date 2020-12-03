@@ -41,35 +41,8 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
 
     @Override
     public boolean matches(final Object actual) {
-        final Class<?> actualClass = actual.getClass();
-        if (actualClass.equals(this.expectedClass)) {
-            if (actualClass.equals(BigDecimal.class)) {
-                final BigDecimal actualBigDecimal = (BigDecimal) actual;
-                return actualBigDecimal.compareTo((BigDecimal) this.expected) == 0;
-            } else {
-                return actual.equals(this.expected);
-            }
-        } else if (actualClass.equals(java.math.BigDecimal.class)) {
-            return matchBigDecimal(actual, this.expectedClass);
-        } else {
-            return actual.equals(this.expected);
-        }
-    }
-
-    private boolean matchBigDecimal(final Object actual, final Class<?> expectedClass) {
-        final BigDecimal concreteActual = (BigDecimal) actual;
-        if (expectedClass.equals(java.lang.Byte.class)) {
-            return concreteActual.compareTo(BigDecimal.valueOf((Byte) this.expected)) == 0;
-        } else if (expectedClass.equals(java.lang.Short.class)) {
-            return concreteActual.compareTo(BigDecimal.valueOf((Short) this.expected)) == 0;
-        } else if (expectedClass.equals(java.lang.Integer.class)) {
-            return concreteActual.compareTo(BigDecimal.valueOf((Integer) this.expected)) == 0;
-        } else if (expectedClass.equals(java.lang.Long.class)) {
-            return concreteActual.longValue() == (Long) this.expected;
-        } else if (expectedClass.equals(java.lang.Float.class)) {
-            return concreteActual.floatValue() == (Float) this.expected;
-        } else if (expectedClass.equals(java.lang.Double.class)) {
-            return concreteActual.doubleValue() == (Double) this.expected;
+        if (actual instanceof Number && this.expected instanceof Number) {
+            return new BigDecimal(actual.toString()).compareTo(new BigDecimal(this.expected.toString())) == 0;
         } else {
             return actual.equals(this.expected);
         }
