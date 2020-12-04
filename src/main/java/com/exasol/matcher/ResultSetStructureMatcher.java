@@ -1,7 +1,6 @@
 package com.exasol.matcher;
 
-import static org.hamcrest.Matchers.*;
-
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
@@ -22,13 +21,13 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private int deviationStartColumn;
     private int deviationStartRow;
     private final List<Column> actualColumns = new ArrayList<>();
-    private final boolean fuzzy;
+    private final TypeMatchMode typeMatchMode;
     private final Description cellDescription = new StringDescription();
     private final Description cellMismatchDescription = new StringDescription();
 
     private ResultSetStructureMatcher(final Builder builder) {
         this.expectedColumns = builder.expectedColumns;
-        this.fuzzy = builder.fuzzy;
+        this.typeMatchMode = builder.typeMatchMode;
         this.contentDeviates = false;
         this.cellMatcherTable = wrapExpectedValuesInMatchers(builder);
     }
@@ -42,24 +41,21 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         return tableOfMatchers;
     }
 
+    private static Matcher<?> castToMatcher(final Object expectedCellValue) {
+        return (Matcher<?>) expectedCellValue;
+    }
+
     private List<Matcher<?>> wrapExpecteRowInMatchers(final List<Object> expectedRow) {
         final List<Matcher<?>> rowOfMatchers = new ArrayList<>(expectedRow.size());
         for (final Object expectedCellValue : expectedRow) {
             if (expectedCellValue instanceof Matcher<?>) {
                 rowOfMatchers.add(castToMatcher(expectedCellValue));
-            } else if (expectedCellValue == null) {
-                rowOfMatchers.add(nullValue());
-            } else if (this.fuzzy) {
-                rowOfMatchers.add(FuzzyCellMatcher.fuzzilyEqualTo(expectedCellValue));
             } else {
-                rowOfMatchers.add(allOf(instanceOf(expectedCellValue.getClass()), equalTo(expectedCellValue)));
+                rowOfMatchers
+                        .add(CellMatcherFactory.cellMatcher(expectedCellValue, this.typeMatchMode, BigDecimal.ZERO));
             }
         }
         return rowOfMatchers;
-    }
-
-    private Matcher<?> castToMatcher(final Object expectedCellValue) {
-        return (Matcher<?>) expectedCellValue;
     }
 
     @Override
@@ -72,7 +68,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         if (isAnyColumnDetailSpecified()) {
             description.appendList(" (", ", ", ")", this.expectedColumns);
         }
-        if (this.fuzzy) {
+        if (!this.typeMatchMode.equals(TypeMatchMode.STRICT)) {
             description.appendText(" (fuzzy match)");
         }
     }
@@ -104,7 +100,9 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                     .appendValue(this.deviationStartRow) //
                     .appendText(", column ") //
                     .appendValue(this.deviationStartColumn) //
-                    .appendText(": ") //
+                    .appendText(": expected was ") //
+                    .appendText(this.cellDescription.toString())//
+                    .appendText(" but ")//
                     .appendText(this.cellMismatchDescription.toString());
         }
     }
@@ -222,7 +220,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private final List<List<Object>> expectedTable = new ArrayList<>();
         private int rows = 0;
         private List<Column> expectedColumns = new ArrayList<>();
-        private boolean fuzzy = false;
+        private TypeMatchMode typeMatchMode;
 
         public Builder() {
         }
@@ -269,16 +267,29 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          * @return matcher
          */
         public Matcher<ResultSet> matches() {
+            this.typeMatchMode = TypeMatchMode.STRICT;
+            return new ResultSetStructureMatcher(this);
+        }
+
+        /**
+         * Create a new matcher that matches cell types strictly.
+         *
+         * @return matcher
+         */
+        public Matcher<ResultSet> matches(final TypeMatchMode typeMatchMode) {
+            this.typeMatchMode = typeMatchMode;
             return new ResultSetStructureMatcher(this);
         }
 
         /**
          * Create a new matcher that matches cell types fuzzily.
-         *
+         * 
+         * @deprecated use {@link #matches(TypeMatchMode)} with {@link TypeMatchMode#NO_TYPE_CHECK} instead.
          * @return matcher
          */
+        @Deprecated(since = "1.3.0")
         public Matcher<ResultSet> matchesFuzzily() {
-            this.fuzzy = true;
+            this.typeMatchMode = TypeMatchMode.NO_TYPE_CHECK;
             return new ResultSetStructureMatcher(this);
         }
     }

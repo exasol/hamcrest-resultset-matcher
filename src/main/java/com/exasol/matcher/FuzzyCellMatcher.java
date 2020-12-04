@@ -16,7 +16,8 @@ import org.hamcrest.Description;
  */
 public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     private final T expected;
-    private final Class<?> expectedClass;
+    private final BigDecimal tolerance;
+    private BigDecimal lastDifference;
 
     /**
      * Creates a {@link FuzzyCellMatcher} that matches cell values in a more relaxed fashion.
@@ -30,41 +31,80 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     }
 
     /**
-     * Create a new instance of a {@link FuzzyCellMatcher}.
+     * Create a new instance of a {@link FuzzyCellMatcher} with zero tolerance.
      *
      * @param expected the expected cell content.
      */
     public FuzzyCellMatcher(final T expected) {
+        this(expected, BigDecimal.ZERO);
+    }
+
+    /**
+     * Create a new instance of a {@link FuzzyCellMatcher} with configurable tolerance for number matching.
+     *
+     * @param expected  the expected cell content.
+     * @param tolerance tolerance for number matching.
+     */
+    public FuzzyCellMatcher(final T expected, final BigDecimal tolerance) {
         this.expected = expected;
-        this.expectedClass = expected.getClass();
+        this.tolerance = tolerance;
+    }
+
+    /**
+     * Creates a {@link FuzzyCellMatcher} that matches cell values in a more relaxed fashion with a tolerance for number
+     * matching.
+     *
+     * @param <T>       the expected type
+     * @param expected  expected value
+     * @param tolerance tolerance for number matching
+     * @return new matcher instance
+     */
+    public static <T> FuzzyCellMatcher<T> fuzzilyEqualTo(final T expected, final BigDecimal tolerance) {
+        return new FuzzyCellMatcher<>(expected, tolerance);
     }
 
     @Override
     public boolean matches(final Object actual) {
+        this.lastDifference = null;
         if (actual instanceof Number && this.expected instanceof Number) {
-            return new BigDecimal(actual.toString()).compareTo(new BigDecimal(this.expected.toString())) == 0;
+            final BigDecimal actualBigDecimal = new BigDecimal(actual.toString());
+            final BigDecimal expectedBigDecimal = new BigDecimal(this.expected.toString());
+            if (actualBigDecimal.compareTo(expectedBigDecimal) == 0) {
+                return true;
+            } else {
+                return checkNumbersWithTolerance(actualBigDecimal, expectedBigDecimal);
+            }
         } else {
             return actual.equals(this.expected);
         }
     }
 
+    private boolean checkNumbersWithTolerance(final BigDecimal actualBigDecimal, final BigDecimal expectedBigDecimal) {
+        this.lastDifference = actualBigDecimal.subtract(expectedBigDecimal).abs();
+        return this.lastDifference.compareTo(this.tolerance) < 1;
+    }
+
     @Override
     public void describeTo(final Description description) {
-        description.appendValue(this.expected) //
-                .appendText(" (") //
-                .appendText(this.expectedClass.getName()) //
-                .appendText(")");
+        if (matchesWithTolerance()) {
+            description.appendText("a value close to ").appendValue(this.expected).appendText(" (tolerance: ")
+                    .appendValue(this.tolerance).appendText(")");
+        } else {
+            description.appendText("a value equal to ");
+            description.appendValue(this.expected);
+        }
+    }
+
+    private boolean matchesWithTolerance() {
+        return this.tolerance.compareTo(BigDecimal.ZERO) != 0;
     }
 
     @Override
     public void describeMismatch(final Object item, final Description description) {
-        description.appendValue(this.expected) //
-                .appendText(" (") //
-                .appendText(this.expectedClass.getName()) //
-                .appendText(") was ") //
-                .appendValue(item) //
-                .appendText(" (") //
-                .appendText(item.getClass().getName()) //
-                .appendText(")");
+        description.appendText(" was ") //
+                .appendValue(item);
+        if (matchesWithTolerance() && this.lastDifference != null) {
+            description.appendText(" difference was ").appendValue(this.lastDifference);
+        }
     }
 }

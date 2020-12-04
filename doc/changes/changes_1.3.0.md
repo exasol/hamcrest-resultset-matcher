@@ -2,6 +2,10 @@
 
 Code name: ??
 
+## Features / Enhancements
+
+* # 21: Added fuzzy matching for numbers with tolerance
+
 ## Bug fixes
 
 * # 17: Fixed NullPointerException when matching empty table

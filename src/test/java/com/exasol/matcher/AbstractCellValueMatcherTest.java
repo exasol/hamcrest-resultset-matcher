@@ -1,6 +1,7 @@
 package com.exasol.matcher;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -8,6 +9,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * This class contains abstract tests for the matching of cell values.
@@ -56,15 +59,16 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
         execute("INSERT INTO " + testTableName + " VALUES (" + actualValueSql + ")");
         final ResultSetStructureMatcher.Builder row = table().row(expectedValue);
         if (fuzzy) {
-            assertThat(query("SELECT * FROM " + testTableName), row.matchesFuzzily());
+            assertThat(query("SELECT * FROM " + testTableName), row.matches(TypeMatchMode.NO_TYPE_CHECK));
         } else {
             assertThat(query("SELECT * FROM " + testTableName), row.matches());
         }
     }
 
-    protected void assertTypeFuzzyMismatch(final String columnType, final String actualValueSql,
+    protected AssertionError assertTypeFuzzyMismatch(final String columnType, final String actualValueSql,
             final Object expectedValue) {
-        assertThrows(AssertionError.class, () -> assertTypeMatch(columnType, actualValueSql, expectedValue, true));
+        return assertThrows(AssertionError.class,
+                () -> assertTypeMatch(columnType, actualValueSql, expectedValue, true));
     }
 
     @Test
@@ -143,13 +147,8 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
     }
 
     @Test
-    void testFuzzyMatchDecimalWithFractionToLong() {
+    void testFuzzyMismatchDecimalWithFractionToLong() {
         assertTypeFuzzyMismatch("DECIMAL(30,1)", "27.3", 27);
-    }
-
-    @Test
-    void testFuzzyMatchDecimalWithFractionToLongWithCeil() {
-        assertTypeFuzzyMismatch("DECIMAL(30,1)", "26.8", 27);
     }
 
     @Test
@@ -166,5 +165,20 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
     @Test
     void testFuzzyMismatchTwoStrings() {
         assertTypeFuzzyMismatch("VARCHAR(40)", "'a'", "b");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "26.81", "26.83" })
+    void testFuzzyMatchDecimalWithTolerance(final String actualValue) {
+        assertTypeFuzzyMatch("DECIMAL(30,3)", actualValue,
+                FuzzyCellMatcher.fuzzilyEqualTo(26.82, BigDecimal.valueOf(0.015)));
+    }
+
+    @Test
+    void testFuzzyMismatchDecimalWithTolerance() {
+        final AssertionError exception = assertTypeFuzzyMismatch("DECIMAL(30,3)", "26.81",
+                FuzzyCellMatcher.fuzzilyEqualTo(26.83, BigDecimal.valueOf(0.015)));
+        assertThat(exception.getMessage(), endsWith(
+                "ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: expected was a value close to <26.83> (tolerance: <0.015>) but  was <26.810> difference was <0.020>"));
     }
 }

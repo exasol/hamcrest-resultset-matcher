@@ -1,12 +1,11 @@
 package com.exasol.matcher;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import java.sql.*;
+
+import org.junit.jupiter.api.*;
 
 class CellValueMatcherTest extends AbstractCellValueMatcherTest {
     @BeforeEach
@@ -28,5 +27,36 @@ class CellValueMatcherTest extends AbstractCellValueMatcherTest {
     @Test
     void testMatchIntegerToJavaInteger() {
         assertTypeStrictMatch("INTEGER", "1001", 1001);
+    }
+
+    @Test
+    void testFuzzyUpcastOnlyMismatch() {
+        final AssertionError error = assertTypeFuzzyMismatch("INTEGER", "12",
+                UpcastOnlyCellMatcher.isOnlyUpcastTo((short) 12));
+        assertThat(error.getMessage(), endsWith(
+                "The actual type is bigger than the expected. You can disable this check by using the NO_TYPE_CHECK fuzzy-mode."));
+    }
+
+    @Test
+    void testFuzzyUpcastOnlyMismatchToFloat() {
+        final AssertionError error = assertTypeFuzzyMismatch("INTEGER", "12",
+                UpcastOnlyCellMatcher.isOnlyUpcastTo(12.0f));
+        assertThat(error.getMessage(), endsWith(
+                "Illegal upcast. Upcasts are only allowed from non floating types <= short to float and from types <= integer to double."));
+    }
+
+    @Test
+    void testFuzzyUpcastOnlyMatchToDouble() {
+        assertTypeFuzzyMatch("INTEGER", "12", UpcastOnlyCellMatcher.isOnlyUpcastTo(12.0d));
+    }
+
+    @Test
+    void testFuzzyUpcastOnlyMatchToInteger() {
+        assertTypeFuzzyMatch("INTEGER", "12", UpcastOnlyCellMatcher.isOnlyUpcastTo(12));
+    }
+
+    @Test
+    void testFuzzyUpcastOnlyMatchToLong() {
+        assertTypeFuzzyMatch("INTEGER", "12", UpcastOnlyCellMatcher.isOnlyUpcastTo(12L));
     }
 }
