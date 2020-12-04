@@ -273,7 +273,8 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
 
         /**
          * Create a new matcher that matches cell types strictly.
-         *
+         * 
+         * @param typeMatchMode mode for type matching
          * @return matcher
          */
         public Matcher<ResultSet> matches(final TypeMatchMode typeMatchMode) {

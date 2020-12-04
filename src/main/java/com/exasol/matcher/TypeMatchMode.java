@@ -11,7 +11,7 @@ public enum TypeMatchMode {
     NO_TYPE_CHECK,
     /**
      * In this mode this matcher checks that the actual type can be safely casted to the expected type. If for example
-     * the result contains an Short but an Integer is expected the matcher would match. The other way around (Integer ->
+     * the result contains an Short but an Integer is expected the matcher would match. The other way around (Integer to
      * Short) it would not.
      */
     UPCAST_ONLY,
