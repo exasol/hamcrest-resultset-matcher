@@ -184,14 +184,13 @@ assertThat(result,
 
 #### The `UPCAST_ONLY` Type Check Mode
 
-If you don't want to have the strict type checks but still some type safety you can use the `UPCAST_ONLY` mode. In this
-mode, the `ResultSetStructureMatcher` will check if the actual data type fits into the one you defined.
+If you don't want to have the strict type checks but still need some type safety you can use the `UPCAST_ONLY` mode. In this mode, the `ResultSetStructureMatcher` will check if the actual data type fits into the one you defined.
 
 If for example, the database returns a `Short` but you specified an `Integer`, it is ok, because `Integer` is a larger
 type than `Short`.
 
-ResultSetStructureMatcher does not allow `Float`s and `Double`s values for expected non floating-point numbers. The
-other way around it is ok as long as the type fit's into the other one (types <= `Short` -> `Float` and <= `Integer`
+The `ResultSetStructureMatcher` does not allow `Float`s and `Double`s values for expected non-floating-point numbers. The
+other way around it is fine &mdash; as long as the type fit's into the other one (types &le; `Short` &rarr; `Float` and &ge; `Integer`
 into `Double`).
 
 ### Nesting Matchers

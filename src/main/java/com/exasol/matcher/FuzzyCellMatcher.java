@@ -87,7 +87,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     @Override
     public void describeTo(final Description description) {
         if (matchesWithTolerance()) {
-            description.appendText("a value close to ").appendValue(this.expected).appendText(" (tolerance: ")
+            description.appendText("a value close to ").appendValue(this.expected).appendText(" (tolerance: +/- ")
                     .appendValue(this.tolerance).appendText(")");
         } else {
             description.appendText("a value equal to ");

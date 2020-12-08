@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import org.hamcrest.Matcher;
 
 /**
- * This class builds hamcrest matchers for given cell values.
+ * This class builds Hamcrest matchers for given cell values.
  */
 public class CellMatcherFactory {
 
@@ -18,12 +18,12 @@ public class CellMatcherFactory {
     }
 
     /**
-     * Build a hamcrest matcher than matches values equal to the given value.
+     * Build a Hamcrest matcher that matches values if they are equal to the given value.
      * 
      * @param expectedCellValue expected value / matcher
      * @param typeMatchMode     type match mode
      * @param fuzzyTolerance    tolerance for fuzzy matching numbers
-     * @return built matcher.
+     * @return built matcher
      */
     public static Matcher<Object> cellMatcher(final Object expectedCellValue, final TypeMatchMode typeMatchMode,
             final BigDecimal fuzzyTolerance) {

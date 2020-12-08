@@ -5,7 +5,7 @@ import java.util.Arrays;
 import org.hamcrest.*;
 
 /**
- * This hamcrest matcher improves the error reporting of the {@link org.hamcrest.core.AllOf} matcher.
+ * This Hamcrest matcher improves upon the error reporting of the {@link org.hamcrest.core.AllOf} matcher.
  */
 public class EnhancedAllOfMatcher<T> extends DiagnosingMatcher<T> {
     private final Iterable<Matcher<? super T>> matchers;
@@ -15,7 +15,7 @@ public class EnhancedAllOfMatcher<T> extends DiagnosingMatcher<T> {
     }
 
     /**
-     * Get a {@link EnhancedAllOfMatcher} for multiple other matchers.
+     * Get an {@link EnhancedAllOfMatcher} for multiple other matchers.
      *
      * @param matchers matcher to combine
      * @param <T>      matcher type
@@ -39,6 +39,6 @@ public class EnhancedAllOfMatcher<T> extends DiagnosingMatcher<T> {
 
     @Override
     public void describeTo(final Description description) {
-        description.appendList("(", " " + "and" + " ", ")", this.matchers);
+        description.appendList("(", " and ", ")", this.matchers);
     }
 }

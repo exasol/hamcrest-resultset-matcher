@@ -1,7 +1,7 @@
 package com.exasol.matcher;
 
 /**
- * Modes for fuzzy matching.
+* Modes for result set matching.
  */
 public enum TypeMatchMode {
     /**
@@ -11,12 +11,12 @@ public enum TypeMatchMode {
     NO_TYPE_CHECK,
     /**
      * In this mode this matcher checks that the actual type can be safely casted to the expected type. If for example
-     * the result contains an Short but an Integer is expected the matcher would match. The other way around (Integer to
-     * Short) it would not.
+     * the result contains a short but an integer is expected the result matches. The other way around (integer to
+     * short) it does not.
      */
     UPCAST_ONLY,
     /**
-     * In this mode checks that the data types exactly match.
+     * In this mode Java data types must be an exact match.
      */
     STRICT
 }

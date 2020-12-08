@@ -8,7 +8,7 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 /**
- * This matcher checks, that the actual cell has a type that can be safely up-casted to th expected type.
+ * This matcher checks, that the actual cell has a type that can be safely up-cast to the expected type.
  * <p>
  * If the actual or expected types are not numeric, this matcher always matches.
  * </p>
@@ -30,10 +30,10 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     }
 
     /**
-     * Create a {@link UpcastOnlyCellMatcher}.
+     * Create a new instance of an {@link UpcastOnlyCellMatcher}.
      *
      * @param expected expected value
-     * @param <T>      type of the matcher
+     * @param <T>      type of the matched value
      * @return built {@link UpcastOnlyCellMatcher}
      */
     public static <T> UpcastOnlyCellMatcher<T> isOnlyUpcastTo(final T expected) {
@@ -52,7 +52,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText("type safely castable to ").appendText(this.expected.getClass().getName());
+        description.appendText("type that can safely be cast to ").appendText(this.expected.getClass().getName());
     }
 
     @Override
