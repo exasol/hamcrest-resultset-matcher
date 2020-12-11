@@ -119,9 +119,9 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO CELL_VALUE_FUZZY_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
         assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_FUZZY_MISMATCH",
                 table().row("foo", 1).row("bar", 2).matches(TypeMatchMode.UPCAST_ONLY),
-                "ResultSet with <2> rows and <2> columns (fuzzy match)", //
+                "ResultSet with <2> rows and <2> columns", //
                 "ResultSet with <2> rows and <2> columns" //
-                        + " where content deviates starting row <2>, column <1>: expected was (type safely castable to java.lang.String and a value equal to \"bar\") but  was \"error_here\"");
+                        + " where content deviates starting row <2>, column <1>: expected was (type that can safely be cast to java.lang.String and a value equal to \"bar\") but  was \"error_here\"");
     }
 
     @Test

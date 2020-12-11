@@ -59,7 +59,7 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
         execute("INSERT INTO " + testTableName + " VALUES (" + actualValueSql + ")");
         final ResultSetStructureMatcher.Builder row = table().row(expectedValue);
         if (fuzzy) {
-            assertThat(query("SELECT * FROM " + testTableName), row.matches(TypeMatchMode.NO_TYPE_CHECK));
+            assertThat(query("SELECT * FROM " + testTableName), row.matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
         } else {
             assertThat(query("SELECT * FROM " + testTableName), row.matches());
         }
@@ -179,6 +179,6 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
         final AssertionError exception = assertTypeFuzzyMismatch("DECIMAL(30,3)", "26.81",
                 FuzzyCellMatcher.fuzzilyEqualTo(26.83, BigDecimal.valueOf(0.015)));
         assertThat(exception.getMessage(), endsWith(
-                "ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: expected was a value close to <26.83> (tolerance: <0.015>) but  was <26.810> difference was <0.020>"));
+                "ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: expected was a value close to <26.83> (tolerance: +/- <0.015>) but  was <26.810> difference was <0.020>"));
     }
 }

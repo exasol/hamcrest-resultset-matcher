@@ -68,9 +68,6 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         if (isAnyColumnDetailSpecified()) {
             description.appendList(" (", ", ", ")", this.expectedColumns);
         }
-        if (!this.typeMatchMode.equals(TypeMatchMode.STRICT)) {
-            description.appendText(" (fuzzy match)");
-        }
     }
 
     private boolean isAnyColumnDetailSpecified() {
@@ -285,12 +282,12 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         /**
          * Create a new matcher that matches cell types fuzzily.
          * 
-         * @deprecated use {@link #matches(TypeMatchMode)} with {@link TypeMatchMode#NO_TYPE_CHECK} instead.
+         * @deprecated use {@link #matches(TypeMatchMode)} with {@link TypeMatchMode#NO_JAVA_TYPE_CHECK} instead.
          * @return matcher
          */
         @Deprecated(since = "1.3.0")
         public Matcher<ResultSet> matchesFuzzily() {
-            this.typeMatchMode = TypeMatchMode.NO_TYPE_CHECK;
+            this.typeMatchMode = TypeMatchMode.NO_JAVA_TYPE_CHECK;
             return new ResultSetStructureMatcher(this);
         }
     }

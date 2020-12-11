@@ -1,23 +1,16 @@
 # Hamcrest ResultSet Matcher User Guide
 
-The `ResultSet` matcher is the implementation of a [Java Hamcrest matcher](JavaHamcrest). The Hamcrest (an anagram of "
-matchers") suite is a collection of matchers that aim to be written declaratively and provide better than average
-diagnostics messages in case of mismatches.
+The `ResultSet` matcher is the implementation of a [Java Hamcrest matcher](JavaHamcrest). The Hamcrest (an anagram of "matchers") suite is a collection of matchers that aim to be written declaratively and provide better than average diagnostics messages in case of mismatches.
 
-This particular matcher helps testers to validate the contents
-of [JDBC result sets](https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/ResultSet.html). Checking
-result sets is a typical part of integration testing Java database applications.
+This particular matcher helps testers to validate the contents of [JDBC result sets](https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/ResultSet.html). Checking result sets is a typical part of integration testing Java database applications.
 
 This matcher collection here makes that task more convenient.
 
 ## Getting the ResultSet Matcher Into Your Project
 
-The Hamcrest ResultSet Matchers are built using [Apache Maven](https://maven.apache.org/), so integrating the release
-package into your project is easy with Maven.
+The Hamcrest ResultSet Matchers are built using [Apache Maven](https://maven.apache.org/), so integrating the release package into your project is easy with Maven.
 
-Please check
-out ["Introduction to the Dependency Mechanism"](http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html)
-, if you want to learn about how maven handles dependencies and dependency scopes.
+Please check out ["Introduction to the Dependency Mechanism"](http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html), if you want to learn about how maven handles dependencies and dependency scopes.
 
 We assume here that you are familiar with the basics.
 
@@ -39,12 +32,9 @@ As always, check for the latest version of the dependencies.
 
 ## Matchers and Unit Test Frameworks
 
-Although checking a result set is by definition already an integration test (because you are testing the integration of
-your software with a database), you will most likely write the tests using a unit testing framework.
+Although checking a result set is by definition already an integration test (because you are testing the integration of your software with a database), you will most likely write the tests using a unit testing framework.
 
-We recommend
-using [test containers together with JUnit 5](https://www.testcontainers.org/test_framework_integration/junit_5/). If
-you want to do that, please also add the following dependency.
+We recommend using [test containers together with JUnit 5](https://www.testcontainers.org/test_framework_integration/junit_5/). If you want to do that, please also add the following dependency.
 
 ```xml
 
@@ -62,16 +52,14 @@ In our examples below we assume you are using JUnit 5 though.
 
 ## The Two Flavors of the ResulSetMatcher
 
-Depending on your personal preferences or the use case for the test, you can pick between two different kinds of result
-set matchers.
+Depending on your personal preferences or the use case for the test, you can pick between two different kinds of result set matchers.
 
 1. Matcher that compares two JDBC `ResultSet`s
 2. Matcher that compares a JDBC `ResultSet` against a definition written in Java
 
 ## The `ResultSetMatcher`
 
-This matcher allows you to compare two `ResultSet`s. This can be helpful when you need, for example, to compare each
-value of two tables.
+This matcher allows you to compare two `ResultSet`s. This can be helpful when you need, for example, to compare each value of two tables.
 
 A minimal test would then look as in the example below.
 
@@ -94,9 +82,7 @@ class CustomerTablePopulationTest {
 }
 ```
 
-Please keep in mind that you need to have two opened `ResultSet`s for this matcher. Some JDBC drivers close the
-previously opened `ResultSet` as soon as you execute the next query on a `Statement`. So you might be need to have two
-statements as shown in the example above.
+Please keep in mind that you need to have two opened `ResultSet`s for this matcher. Some JDBC drivers close the previously opened `ResultSet` as soon as you execute the next query on a `Statement`. So you might be need to have two statements as shown in the example above.
 
 ## The `ResultSetStructureMatcher`
 
@@ -108,8 +94,7 @@ Imagine you want to test code that fills the following table:
 CREATE TABLE Customers (ID INTEGER, FIRSTNAME VARCHAR(40), LASTNAME VARCHAR(40));
 ```
 
-A minimal test would then look as in the example below. We removed all parts that are non-essential for understanding
-the code (e.g. imports that are not matcher-related).
+A minimal test would then look as in the example below. We removed all parts that are non-essential for understanding the code (e.g. imports that are not matcher-related).
 
 ```java
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
@@ -131,9 +116,7 @@ class CustomerTablePopulationTest {
 }
 ```
 
-As you can see, the test validates that the result set contains two rows and those rows contents. It does however not
-care about the column type of the result set. If you want to make the test more strict in that respect, you can add type
-names to the factory method `table(...)`.
+As you can see, the test validates that the result set contains two rows and those rows contents. It does however not care about the column type of the result set. If you want to make the test more strict in that respect, you can add type names to the factory method `table(...)`.
 
 ```java
 assertThat(result,table("INTEGER","VARCHAR","VARCHAR")
@@ -144,18 +127,14 @@ assertThat(result,table("INTEGER","VARCHAR","VARCHAR")
 
 ### Type Checks / Fuzzy Matching
 
-By default, the `ResultSetStructureMatcher` checks that the Java data types of the result matches the ones you
-specified.
+By default, the `ResultSetStructureMatcher` checks that the Java data types of the result matches the ones you specified.
 
-In the regular `STRICT` mode, the Java types in the result set and in the definition of your expectation must match
-exactly. While this can be what you want, there are also cases where exact matches are simply too much effort for what
-you actually want to test. For that there `ResultSetStructureMatcher` has two other type matching modes: `NO_TYPE_CHECK`
+In the regular `STRICT` mode, the Java types in the result set and in the definition of your expectation must match exactly. While this can be what you want, there are also cases where exact matches are simply too much effort for what you actually want to test. For that there `ResultSetStructureMatcher` has two other type matching modes: `NO_JAVA_TYPE_CHECK`
 and `UPCAST_ONLY`
 
-#### The `NO_TYPE_CHECK` Type Check Mode
+#### The `NO_JAVA_TYPE_CHECK` Type Check Mode
 
-Imagine a case where the result set contains a `DECIMAL(2,0)` column. The corresponding Java type is `BigDecimal`. So if
-you want to do a strict match, you need to say:
+Imagine a case where the result set contains a `DECIMAL(2,0)` column. The corresponding Java type is `BigDecimal`. So if you want to do a strict match, you need to say:
 
 ```java
 assertThat(result,table("DECIMAL")
@@ -165,13 +144,11 @@ assertThat(result,table("DECIMAL")
         .matches()); // alias for .matches(TypeMatchMode.STRICT)
 ```
 
-That's very explicit. In fact it is probably a lot more explicit than you are comfortable with &mdash; especially if you
-want to compare a lot of rows.
+That's very explicit. In fact it is probably a lot more explicit than you are comfortable with &mdash; especially if you want to compare a lot of rows.
 
 This is where fuzzy matching comes into play.
 
-What you probably want to test is if the integer value 1234 matches the value of the first cell in row one and so on. To
-do this, you can instead formulate the following assertion:
+What you probably want to test is if the integer value 1234 matches the value of the first cell in row one and so on. To do this, you can instead formulate the following assertion:
 
 ```java
 assertThat(result,
@@ -179,27 +156,22 @@ assertThat(result,
         .row(1234)
         .row(987654321)
         // ...
-        .matches(TypeMatchMode.NO_TYPE_CHECK));
+        .matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
 ```
 
 #### The `UPCAST_ONLY` Type Check Mode
 
 If you don't want to have the strict type checks but still need some type safety you can use the `UPCAST_ONLY` mode. In this mode, the `ResultSetStructureMatcher` will check if the actual data type fits into the one you defined.
 
-If for example, the database returns a `Short` but you specified an `Integer`, it is ok, because `Integer` is a larger
-type than `Short`.
+For example getting a `Short` instead of an `Integer` is acceptable because `Integer` is a larger type than `Short`.
 
-The `ResultSetStructureMatcher` does not allow `Float`s and `Double`s values for expected non-floating-point numbers. The
-other way around it is fine &mdash; as long as the type fit's into the other one (types &le; `Short` &rarr; `Float` and &ge; `Integer`
-into `Double`).
+The `ResultSetStructureMatcher` does not allow `Float`s and `Double`s values for expected non-floating-point numbers. The other way around it is fine &mdash; as long as the type fit's into the other one (types &le; `Short` &rarr; `Float` and &ge; `Integer` into `Double`).
 
 ### Nesting Matchers
 
-Comparing result sets against tables full of constants is fine if the result is perfectly deterministic and you are
-actually interested in all results.
+Comparing result sets against tables full of constants is fine if the result is perfectly deterministic and you are actually interested in all results.
 
-Imagine a situation where you have an integration test with a random value column (e.g. a password salt). In a case like
-this you can check if the result has the right type and range, but not if the actual value is as expected.
+Imagine a situation where you have an integration test with a random value column (e.g. a password salt). In a case like this you can check if the result has the right type and range, but not if the actual value is as expected.
 
 In the example below we have a table containing the following columns:
 
@@ -218,8 +190,7 @@ Of course you can nest matcher in the nested matcher. That's the beauty of hamcr
 
 ### Matching Floating-Point Numbers
 
-When comparing floating-point numbers you sometimes want only to compare with a given precision. So you don't want to
-check that all decimal digits are exactly equal but match with a certain tolerance.
+When comparing floating-point numbers you sometimes want only to compare with a given precision. So you don't want to check that all decimal digits are exactly equal but match with a certain tolerance.
 
 Wou can do that by:
 
@@ -231,5 +202,4 @@ assertThat(result,
         .matches();
 ```
 
-In this example the tolerance is 0.001. That means that the `ResultSetStructureMatcher` considers two numbers as equal
-if their absolute difference is smaller than the 0.001.  
+In this example the tolerance is 0.001. That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the 0.001.  

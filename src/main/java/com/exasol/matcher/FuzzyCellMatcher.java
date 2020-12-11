@@ -86,7 +86,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
 
     @Override
     public void describeTo(final Description description) {
-        if (matchesWithTolerance()) {
+        if (isMatchingWithToleranceEnabled()) {
             description.appendText("a value close to ").appendValue(this.expected).appendText(" (tolerance: +/- ")
                     .appendValue(this.tolerance).appendText(")");
         } else {
@@ -95,7 +95,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
         }
     }
 
-    private boolean matchesWithTolerance() {
+    private boolean isMatchingWithToleranceEnabled() {
         return this.tolerance.compareTo(BigDecimal.ZERO) != 0;
     }
 
@@ -103,7 +103,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     public void describeMismatch(final Object item, final Description description) {
         description.appendText(" was ") //
                 .appendValue(item);
-        if (matchesWithTolerance() && this.lastDifference != null) {
+        if (isMatchingWithToleranceEnabled() && this.lastDifference != null) {
             description.appendText(" difference was ").appendValue(this.lastDifference);
         }
     }

@@ -32,13 +32,20 @@ public class CellMatcherFactory {
         } else {
             final FuzzyCellMatcher<Object> valueMatcher = FuzzyCellMatcher.fuzzilyEqualTo(expectedCellValue,
                     fuzzyTolerance);
-            if (typeMatchMode.equals(TypeMatchMode.STRICT)) {
-                return enhancedAllOf(instanceOf(expectedCellValue.getClass()), valueMatcher);
-            } else if (typeMatchMode.equals(TypeMatchMode.UPCAST_ONLY)) {
-                return enhancedAllOf(UpcastOnlyCellMatcher.isOnlyUpcastTo(expectedCellValue), valueMatcher);
-            } else {
-                return valueMatcher;
-            }
+            return buildTypeMatcher(expectedCellValue, typeMatchMode, valueMatcher);
+        }
+    }
+
+    private static Matcher<Object> buildTypeMatcher(final Object expectedCellValue, final TypeMatchMode typeMatchMode,
+            final FuzzyCellMatcher<Object> valueMatcher) {
+        switch (typeMatchMode) {
+        case STRICT:
+            return enhancedAllOf(instanceOf(expectedCellValue.getClass()), valueMatcher);
+        case UPCAST_ONLY:
+            return enhancedAllOf(UpcastOnlyCellMatcher.isOnlyUpcastTo(expectedCellValue), valueMatcher);
+        case NO_JAVA_TYPE_CHECK:
+        default:
+            return valueMatcher;
         }
     }
 }

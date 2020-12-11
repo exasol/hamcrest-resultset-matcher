@@ -23,7 +23,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     private static final List<Class<?>> FLOATING_POINT_TYPES = List.of(Float.class, Double.class);
 
     private final T expected;
-    private String explanation;
+    private String explanation = "";
 
     private UpcastOnlyCellMatcher(final T expected) {
         this.expected = expected;
@@ -46,7 +46,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
         if (actual instanceof Number && this.expected instanceof Number) {
             return checkNumbersAreOnlyUpcasted(actual, this.expected);
         } else {
-            return true;
+            return actual.getClass().equals(this.expected.getClass());
         }
     }
 
@@ -69,7 +69,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
         } else if (DECIMAL_TYPES.contains(actual.getClass()) && FLOATING_POINT_TYPES.contains(expected.getClass())) {
             return checkDecimalToFloatUpcast(actual);
         } else {
-            this.explanation = "\nCan not cast from actual floating point to expected non-floating point type.";
+            this.explanation = "Can not cast from actual floating point to expected non-floating point type.";
             return false;
         }
     }
@@ -80,7 +80,6 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
             return true; // we can safely cast a SHORT to a float or double
         } else if (actualIndex <= DECIMAL_TYPES.indexOf(Integer.class)
                 && this.expected.getClass().equals(Double.class)) {
-            setFloatingPointExplanation();
             return true; // we can safely cast an Integer to a double
         } else {
             setFloatingPointExplanation();
@@ -107,10 +106,10 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     }
 
     private void setActualTypeBiggerThatExpectedExplanation() {
-        this.explanation = "\nThe actual type is bigger than the expected. You can disable this check by using the NO_TYPE_CHECK fuzzy-mode.";
+        this.explanation = "The actual type is bigger than the expected. You can disable this check by using the NO_JAVA_TYPE_CHECK fuzzy-mode.";
     }
 
     private void setFloatingPointExplanation() {
-        this.explanation = "\nIllegal upcast. Upcasts are only allowed from non floating types <= short to float and from types <= integer to double.";
+        this.explanation = "Illegal upcast. Upcasts are only allowed from non floating types <= short to float and from types <= integer to double.";
     }
 }

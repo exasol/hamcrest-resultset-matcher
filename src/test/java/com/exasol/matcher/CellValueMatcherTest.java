@@ -34,7 +34,7 @@ class CellValueMatcherTest extends AbstractCellValueMatcherTest {
         final AssertionError error = assertTypeFuzzyMismatch("INTEGER", "12",
                 UpcastOnlyCellMatcher.isOnlyUpcastTo((short) 12));
         assertThat(error.getMessage(), endsWith(
-                "The actual type is bigger than the expected. You can disable this check by using the NO_TYPE_CHECK fuzzy-mode."));
+                "The actual type is bigger than the expected. You can disable this check by using the NO_JAVA_TYPE_CHECK fuzzy-mode."));
     }
 
     @Test
