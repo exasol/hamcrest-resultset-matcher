@@ -17,7 +17,7 @@ public class EnhancedAllOfMatcher<T> extends DiagnosingMatcher<T> {
     /**
      * Get an {@link EnhancedAllOfMatcher} for multiple other matchers.
      *
-     * @param matchers matcher to combine
+     * @param matchers matchers to combine
      * @param <T>      matcher type
      * @return built {@link EnhancedAllOfMatcher}
      */

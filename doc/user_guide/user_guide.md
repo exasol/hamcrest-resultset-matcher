@@ -186,20 +186,19 @@ assertThat(result,
         .matches();
 ```
 
-Of course you can nest matcher in the nested matcher. That's the beauty of hamcrest.
+Of course you can nest matchers in the nested matcher. That's the beauty of Hamcrest.
 
 ### Matching Floating-Point Numbers
 
-When comparing floating-point numbers you sometimes want only to compare with a given precision. So you don't want to check that all decimal digits are exactly equal but match with a certain tolerance.
+When comparing floating-point numbers you might want to compare the actual value against the expectation within a given tolerance. That way actual and expected don't need to be an exact match &mdash; it just needs to be close enough.
 
 Wou can do that by:
 
 ```java
+final BigDecimal tolerance = BigDecimal.valueOf(0.001);
 assertThat(result,
         table()
-        table().row(
-        CellMatcherFactory.cellMatcher(1.234,TypeMatchMode.STRICT,BigDecimal.valueOf(0.001)))
+        .row(CellMatcherFactory.cellMatcher(1.234, TypeMatchMode.STRICT, tolerance))
         .matches();
-```
 
 In this example the tolerance is 0.001. That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the 0.001.  
