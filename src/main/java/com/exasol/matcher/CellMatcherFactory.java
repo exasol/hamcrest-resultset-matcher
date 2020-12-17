@@ -12,7 +12,6 @@ import org.hamcrest.Matcher;
  * This class builds Hamcrest matchers for given cell values.
  */
 public class CellMatcherFactory {
-
     private CellMatcherFactory() {
         // empty ojn purpose
     }
