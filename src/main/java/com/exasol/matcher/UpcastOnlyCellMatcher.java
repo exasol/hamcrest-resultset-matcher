@@ -23,7 +23,17 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     private static final List<Class<?>> FLOATING_POINT_TYPES = List.of(Float.class, Double.class);
 
     private final T expected;
-    private String explanation = "";
+    private Mismatch lastMismatch;
+
+    @Override
+    protected boolean matchesSafely(final T actual) {
+        this.lastMismatch = null;
+        if (actual instanceof Number && this.expected instanceof Number) {
+            return checkNumbersAreOnlyUpcasted(actual, this.expected);
+        } else {
+            return actual.getClass().equals(this.expected.getClass());
+        }
+    }
 
     private UpcastOnlyCellMatcher(final T expected) {
         this.expected = expected;
@@ -41,23 +51,28 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     }
 
     @Override
-    protected boolean matchesSafely(final T actual) {
-        this.explanation = "";
-        if (actual instanceof Number && this.expected instanceof Number) {
-            return checkNumbersAreOnlyUpcasted(actual, this.expected);
-        } else {
-            return actual.getClass().equals(this.expected.getClass());
+    protected void describeMismatchSafely(final T item, final Description mismatchDescription) {
+        switch (this.lastMismatch) {
+        case FLOAT_DECIMAL_MISMATCH:
+            mismatchDescription
+                    .appendText("Can not cast from actual floating point to expected non-floating point type.");
+            break;
+        case ACTUAL_BIGGER_THAN_EXPECTED:
+            mismatchDescription.appendText(
+                    "The actual type is bigger than the expected. You can disable this check by using the NO_JAVA_TYPE_CHECK fuzzy-mode.");
+            break;
+        case DECIMAL_BIGGER_THAN_FLOATING_POINT:
+            mismatchDescription.appendText(
+                    "Illegal upcast. Upcasts are only allowed from non floating types <= short to float and from types <= integer to double.");
+            break;
+        default:
+            break;
         }
     }
 
     @Override
     public void describeTo(final Description description) {
         description.appendText("type that can safely be cast to ").appendText(this.expected.getClass().getName());
-    }
-
-    @Override
-    protected void describeMismatchSafely(final T item, final Description mismatchDescription) {
-        mismatchDescription.appendText(this.explanation);
     }
 
     private boolean checkNumbersAreOnlyUpcasted(final Object actual, final Object expected) {
@@ -69,7 +84,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
         } else if (DECIMAL_TYPES.contains(actual.getClass()) && FLOATING_POINT_TYPES.contains(expected.getClass())) {
             return checkDecimalToFloatUpcast(actual);
         } else {
-            this.explanation = "Can not cast from actual floating point to expected non-floating point type.";
+            this.lastMismatch = Mismatch.FLOAT_DECIMAL_MISMATCH;
             return false;
         }
     }
@@ -82,7 +97,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
                 && this.expected.getClass().equals(Double.class)) {
             return true; // we can safely cast an Integer to a double
         } else {
-            setFloatingPointExplanation();
+            this.lastMismatch = Mismatch.DECIMAL_BIGGER_THAN_FLOATING_POINT;
             return false;
         }
     }
@@ -91,7 +106,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
         if (FLOATING_POINT_TYPES.indexOf(actual.getClass()) <= FLOATING_POINT_TYPES.indexOf(expected.getClass())) {
             return true;
         } else {
-            setActualTypeBiggerThatExpectedExplanation();
+            this.lastMismatch = Mismatch.ACTUAL_BIGGER_THAN_EXPECTED;
             return false;
         }
     }
@@ -100,16 +115,12 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
         if (DECIMAL_TYPES.indexOf(actual.getClass()) <= DECIMAL_TYPES.indexOf(this.expected.getClass())) {
             return true;
         } else {
-            setActualTypeBiggerThatExpectedExplanation();
+            this.lastMismatch = Mismatch.ACTUAL_BIGGER_THAN_EXPECTED;
             return false;
         }
     }
 
-    private void setActualTypeBiggerThatExpectedExplanation() {
-        this.explanation = "The actual type is bigger than the expected. You can disable this check by using the NO_JAVA_TYPE_CHECK fuzzy-mode.";
-    }
-
-    private void setFloatingPointExplanation() {
-        this.explanation = "Illegal upcast. Upcasts are only allowed from non floating types <= short to float and from types <= integer to double.";
+    private enum Mismatch {
+        FLOAT_DECIMAL_MISMATCH, ACTUAL_BIGGER_THAN_EXPECTED, DECIMAL_BIGGER_THAN_FLOATING_POINT
     }
 }
