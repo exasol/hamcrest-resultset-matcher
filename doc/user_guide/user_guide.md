@@ -121,7 +121,7 @@ As you can see, the test validates that the result set contains two rows and tho
 ```java
 assertThat(result,table("INTEGER","VARCHAR","VARCHAR")
         .row(1,"JOHN","DOE")
-        .row(2,"JANE","SMITH)
+        .row(2,"JANE","SMITH")
         .matches());
 ```
 
