@@ -1,10 +1,11 @@
-# hamcrest-resulset-matcher 1.2.3, released 2020-??-??
+# hamcrest-resulset-matcher 1.3.0, released 2020-12-18
 
-Code name: ??
+Code name: Improved fuzzy matching
 
 ## Features / Enhancements
 
 * # 21: Added fuzzy matching for numbers with tolerance
+* # 34: Added fuzzy matching between numbers and strings
 
 ## Bug fixes
 
