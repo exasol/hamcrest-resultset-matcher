@@ -66,16 +66,30 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     @Override
     public boolean matches(final Object actual) {
         this.lastDifference = null;
-        if (actual instanceof Number && this.expected instanceof Number) {
-            final BigDecimal actualBigDecimal = new BigDecimal(actual.toString());
-            final BigDecimal expectedBigDecimal = new BigDecimal(this.expected.toString());
-            if (actualBigDecimal.compareTo(expectedBigDecimal) == 0) {
-                return true;
-            } else {
-                return checkNumbersWithTolerance(actualBigDecimal, expectedBigDecimal);
+        if ((actual instanceof Number && this.expected instanceof Number)
+                || (actual instanceof Number && this.expected instanceof String)
+                || (actual instanceof String && this.expected instanceof Number)) {
+            try {
+                return compareAsNumbers(actual);
+            } catch (final NumberFormatException exception) {
+                return defaultCompare(actual);
             }
         } else {
-            return actual.equals(this.expected);
+            return defaultCompare(actual);
+        }
+    }
+
+    private boolean defaultCompare(final Object actual) {
+        return actual.equals(this.expected);
+    }
+
+    private boolean compareAsNumbers(final Object actual) {
+        final BigDecimal actualBigDecimal = new BigDecimal(actual.toString());
+        final BigDecimal expectedBigDecimal = new BigDecimal(this.expected.toString());
+        if (actualBigDecimal.compareTo(expectedBigDecimal) == 0) {
+            return true;
+        } else {
+            return checkNumbersWithTolerance(actualBigDecimal, expectedBigDecimal);
         }
     }
 

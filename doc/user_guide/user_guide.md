@@ -110,8 +110,8 @@ class CustomerTablePopulationTest {
 
         assertThat(result, table()
                 .row(1, "JOHN", "DOE")
-                .row(2, "JANE", "SMITH)
-                        .matches());
+                .row(2, "JANE", "SMITH")
+                .matches());
     }
 }
 ```
@@ -121,7 +121,7 @@ As you can see, the test validates that the result set contains two rows and tho
 ```java
 assertThat(result,table("INTEGER","VARCHAR","VARCHAR")
         .row(1,"JOHN","DOE")
-        .row(2,"JANE","SMITH)
+        .row(2,"JANE","SMITH")
         .matches());
 ```
 
@@ -158,6 +158,8 @@ assertThat(result,
         // ...
         .matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
 ```
+
+This also matches numbers and strings if they have the same value. For example it considers 1 and "1" as equal.
 
 #### The `UPCAST_ONLY` Type Check Mode
 

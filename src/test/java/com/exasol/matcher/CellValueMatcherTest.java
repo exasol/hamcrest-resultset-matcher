@@ -2,6 +2,7 @@ package com.exasol.matcher;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.sql.*;
 
@@ -48,6 +49,24 @@ class CellValueMatcherTest extends AbstractCellValueMatcherTest {
     @Test
     void testFuzzyUpcastOnlyMatchToDouble() {
         assertTypeFuzzyMatch("INTEGER", "12", UpcastOnlyCellMatcher.isOnlyUpcastTo(12.0d));
+    }
+
+    @Test
+    void testFuzzyMatchVarcharToInt() {
+        assertTypeFuzzyMatch("VARCHAR(5)", "'12'", FuzzyCellMatcher.fuzzilyEqualTo(12));
+    }
+
+    @Test
+    void testFuzzyMatchIntegerToVarchar() {
+        assertTypeFuzzyMatch("INTEGER", "12", FuzzyCellMatcher.fuzzilyEqualTo("12"));
+    }
+
+    @Test
+    void testFuzzyMismatchVarcharToInt() {
+        final AssertionError assertionError = assertTypeFuzzyMismatch("VARCHAR(5)", "'test'",
+                FuzzyCellMatcher.fuzzilyEqualTo(12));
+        assertThat(assertionError.getMessage(), equalTo(
+                "\nExpected: ResultSet with <1> rows and <1> columns\n     but: ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: expected was a value equal to <12> but  was \"test\""));
     }
 
     @Test
