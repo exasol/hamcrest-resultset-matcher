@@ -5,7 +5,7 @@ Code name: Improved fuzzy matching
 ## Features / Enhancements
 
 * # 21: Added fuzzy matching for numbers with tolerance
-* # 34: Added fuzzy matching between numbers and strings
+* # 24: Added fuzzy matching between numbers and strings
 
 ## Bug fixes
 
