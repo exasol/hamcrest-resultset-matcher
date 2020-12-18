@@ -16,7 +16,8 @@ import org.hamcrest.Description;
  */
 public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     private final T expected;
-    private final Class<?> expectedClass;
+    private final BigDecimal tolerance;
+    private BigDecimal lastDifference;
 
     /**
      * Creates a {@link FuzzyCellMatcher} that matches cell values in a more relaxed fashion.
@@ -30,68 +31,80 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     }
 
     /**
-     * Create a new instance of a {@link FuzzyCellMatcher}.
+     * Create a new instance of a {@link FuzzyCellMatcher} with zero tolerance.
      *
      * @param expected the expected cell content.
      */
     public FuzzyCellMatcher(final T expected) {
+        this(expected, BigDecimal.ZERO);
+    }
+
+    /**
+     * Create a new instance of a {@link FuzzyCellMatcher} with configurable tolerance for number matching.
+     *
+     * @param expected  the expected cell content.
+     * @param tolerance tolerance for number matching.
+     */
+    public FuzzyCellMatcher(final T expected, final BigDecimal tolerance) {
         this.expected = expected;
-        this.expectedClass = expected.getClass();
+        this.tolerance = tolerance;
+    }
+
+    /**
+     * Creates a {@link FuzzyCellMatcher} that matches cell values in a more relaxed fashion with a tolerance for number
+     * matching.
+     *
+     * @param <T>       the expected type
+     * @param expected  expected value
+     * @param tolerance tolerance for number matching
+     * @return new matcher instance
+     */
+    public static <T> FuzzyCellMatcher<T> fuzzilyEqualTo(final T expected, final BigDecimal tolerance) {
+        return new FuzzyCellMatcher<>(expected, tolerance);
     }
 
     @Override
     public boolean matches(final Object actual) {
-        final Class<?> actualClass = actual.getClass();
-        if (actualClass.equals(this.expectedClass)) {
-            if (actualClass.equals(BigDecimal.class)) {
-                final BigDecimal actualBigDecimal = (BigDecimal) actual;
-                return actualBigDecimal.compareTo((BigDecimal) this.expected) == 0;
+        this.lastDifference = null;
+        if (actual instanceof Number && this.expected instanceof Number) {
+            final BigDecimal actualBigDecimal = new BigDecimal(actual.toString());
+            final BigDecimal expectedBigDecimal = new BigDecimal(this.expected.toString());
+            if (actualBigDecimal.compareTo(expectedBigDecimal) == 0) {
+                return true;
             } else {
-                return actual.equals(this.expected);
+                return checkNumbersWithTolerance(actualBigDecimal, expectedBigDecimal);
             }
-        } else if (actualClass.equals(java.math.BigDecimal.class)) {
-            return matchBigDecimal(actual, this.expectedClass);
         } else {
             return actual.equals(this.expected);
         }
     }
 
-    private boolean matchBigDecimal(final Object actual, final Class<?> expectedClass) {
-        final BigDecimal concreteActual = (BigDecimal) actual;
-        if (expectedClass.equals(java.lang.Byte.class)) {
-            return concreteActual.compareTo(BigDecimal.valueOf((Byte) this.expected)) == 0;
-        } else if (expectedClass.equals(java.lang.Short.class)) {
-            return concreteActual.compareTo(BigDecimal.valueOf((Short) this.expected)) == 0;
-        } else if (expectedClass.equals(java.lang.Integer.class)) {
-            return concreteActual.compareTo(BigDecimal.valueOf((Integer) this.expected)) == 0;
-        } else if (expectedClass.equals(java.lang.Long.class)) {
-            return concreteActual.longValue() == (Long) this.expected;
-        } else if (expectedClass.equals(java.lang.Float.class)) {
-            return concreteActual.floatValue() == (Float) this.expected;
-        } else if (expectedClass.equals(java.lang.Double.class)) {
-            return concreteActual.doubleValue() == (Double) this.expected;
-        } else {
-            return actual.equals(this.expected);
-        }
+    private boolean checkNumbersWithTolerance(final BigDecimal actualBigDecimal, final BigDecimal expectedBigDecimal) {
+        this.lastDifference = actualBigDecimal.subtract(expectedBigDecimal).abs();
+        return this.lastDifference.compareTo(this.tolerance) < 1;
     }
 
     @Override
     public void describeTo(final Description description) {
-        description.appendValue(this.expected) //
-                .appendText(" (") //
-                .appendText(this.expectedClass.getName()) //
-                .appendText(")");
+        if (isMatchingWithToleranceEnabled()) {
+            description.appendText("a value close to ").appendValue(this.expected).appendText(" (tolerance: +/- ")
+                    .appendValue(this.tolerance).appendText(")");
+        } else {
+            description.appendText("a value equal to ");
+            description.appendValue(this.expected);
+        }
+    }
+
+    private boolean isMatchingWithToleranceEnabled() {
+        return this.tolerance.compareTo(BigDecimal.ZERO) != 0;
     }
 
     @Override
     public void describeMismatch(final Object item, final Description description) {
-        description.appendValue(this.expected) //
-                .appendText(" (") //
-                .appendText(this.expectedClass.getName()) //
-                .appendText(") was ") //
-                .appendValue(item) //
-                .appendText(" (") //
-                .appendText(item.getClass().getName()) //
-                .appendText(")");
+        description.appendText(" was ") //
+                .appendValue(item);
+        if (isMatchingWithToleranceEnabled() && this.lastDifference != null) {
+            description.appendText(" difference was ").appendValue(this.lastDifference);
+        }
     }
 }

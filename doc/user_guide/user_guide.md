@@ -19,6 +19,7 @@ We assume here that you are familiar with the basics.
 Just add the following dependency to add the Hamcrest ResultSet Matcher to your project.
 
 ```xml
+
 <dependency>
     <groupId>com.exasol</groupId>
     <artifactId>hamcrest-resultset-matcher</artifactId>
@@ -36,6 +37,7 @@ Although checking a result set is by definition already an integration test (bec
 We recommend using [test containers together with JUnit 5](https://www.testcontainers.org/test_framework_integration/junit_5/). If you want to do that, please also add the following dependency.
 
 ```xml
+
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>junit-jupiter</artifactId>
@@ -62,7 +64,9 @@ This matcher allows you to compare two `ResultSet`s. This can be helpful when yo
 A minimal test would then look as in the example below.
 
 ```java
-import java.sql.ResultSet;import static org.hamcrest.MatcherAssert.assertThat;
+import java.sql.ResultSet;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 // ...
 
@@ -72,15 +76,13 @@ class CustomerTablePopulationTest {
         // ...
         final ResulSet table1 = statement1.execute("SELECT * FROM CUSTOMERS");
         final ResultSet table2 = statement2.execute("SELECT * FROM CUSTOMERS2");
-        
+
         assertThat(table1, matchesResultSet(table2));
-    } 
+    }
 }
 ```
 
-Please keep in mind that you need to have two opened `ResultSet`s for this matcher. 
-Some JDBC drivers close the previously opened `ResultSet` as soon as you execute the next query on a `Statement`. 
-So you might be need to have two statements as shown in the example above. 
+Please keep in mind that you need to have two opened `ResultSet`s for this matcher. Some JDBC drivers close the previously opened `ResultSet` as soon as you execute the next query on a `Statement`. So you might be need to have two statements as shown in the example above.
 
 ## The `ResultSetStructureMatcher`
 
@@ -105,30 +107,32 @@ class CustomerTablePopulationTest {
     void testTableContents() {
         // ...
         final ResulSet result = statement.execute("SELECT * FROM CUSTOMERS");
-        
+
         assertThat(result, table()
                 .row(1, "JOHN", "DOE")
                 .row(2, "JANE", "SMITH)
-                .matches());
-    } 
+                        .matches());
+    }
 }
 ```
 
 As you can see, the test validates that the result set contains two rows and those rows contents. It does however not care about the column type of the result set. If you want to make the test more strict in that respect, you can add type names to the factory method `table(...)`.
 
 ```java
-assertThat(result, table("INTEGER", "VARCHAR", "VARCHAR")
-        .row(1, "JOHN", "DOE")
-        .row(2, "JANE", "SMITH)
+assertThat(result,table("INTEGER","VARCHAR","VARCHAR")
+        .row(1,"JOHN","DOE")
+        .row(2,"JANE","SMITH)
         .matches());
 ```
 
+### Type Checks / Fuzzy Matching
 
-### Fuzzy Matching
+By default, the `ResultSetStructureMatcher` checks that the Java data types of the result matches the ones you specified.
 
-The `ResultSetStructureMatcher` offers an optional fuzzy-matching mode. This allows you to be less strict when formulating your test cases.
+In the regular `STRICT` mode, the Java types in the result set and in the definition of your expectation must match exactly. While this can be what you want, there are also cases where exact matches are simply too much effort for what you actually want to test. For that there `ResultSetStructureMatcher` has two other type matching modes: `NO_JAVA_TYPE_CHECK`
+and `UPCAST_ONLY`
 
-In the regular strict mode, the Java types in the result set and in the definition of your expectation must match exactly. While this can be what you want, there are also cases where exact matches are simply too much effort for what you actually want to test.
+#### The `NO_JAVA_TYPE_CHECK` Type Check Mode
 
 Imagine a case where the result set contains a `DECIMAL(2,0)` column. The corresponding Java type is `BigDecimal`. So if you want to do a strict match, you need to say:
 
@@ -137,7 +141,7 @@ assertThat(result,table("DECIMAL")
         .row(BigDecimal.valueOf(1234))
         .row(BigDecimal.valueOf(987654321)
         // ...
-        .matches());
+        .matches()); // alias for .matches(TypeMatchMode.STRICT)
 ```
 
 That's very explicit. In fact it is probably a lot more explicit than you are comfortable with &mdash; especially if you want to compare a lot of rows.
@@ -152,16 +156,16 @@ assertThat(result,
         .row(1234)
         .row(987654321)
         // ...
-        .matchesFuzzily());
+        .matches(TypeMatchMode.NO_JAVA_TYPE_CHECK));
 ```
 
-As you can see, it is a lot more compact and readable.
+#### The `UPCAST_ONLY` Type Check Mode
 
-Currently the `ResultSetStructureMatcher` supports the following fuzzy matches:
+If you don't want to have the strict type checks but still need some type safety you can use the `UPCAST_ONLY` mode. In this mode, the `ResultSetStructureMatcher` will check if the actual data type fits into the one you defined.
 
-* `BigDecimal`: `byte`, `short`, `int`, `long`, `float`, `double` (and corresponding [boxed types](https://docs.oracle.com/javase/tutorial/java/data/autoboxing.html))
+For example getting a `Short` instead of an `Integer` is acceptable because `Integer` is a larger type than `Short`.
 
-In case no fuzzy match is known yet, the matcher falls back to strict matching. We will keep adding fuzzy matches over time.
+The `ResultSetStructureMatcher` does not allow `Float`s and `Double`s values for expected non-floating-point numbers. The other way around it is fine &mdash; as long as the type fit's into the other one (types &le; `Short` &rarr; `Float` and &ge; `Integer` into `Double`).
 
 ### Nesting Matchers
 
@@ -178,8 +182,23 @@ In the example below we have a table containing the following columns:
 ```java
 assertThat(result,
         table()
-        .row("fred", matchesPattern("[0-9A-F]+"), greaterThanOrEqualTo(0))
+        .row("fred",matchesPattern("[0-9A-F]+"),greaterThanOrEqualTo(0))
         .matches();
 ```
 
-Of course you can nest matcher in the nested matcher. That's the beauty of hamcrest.
+Of course you can nest matchers in the nested matcher. That's the beauty of Hamcrest.
+
+### Matching Floating-Point Numbers
+
+When comparing floating-point numbers you might want to compare the actual value against the expectation within a given tolerance. That way actual and expected don't need to be an exact match &mdash; it just needs to be close enough.
+
+Wou can do that by:
+
+```java
+final BigDecimal tolerance = BigDecimal.valueOf(0.001);
+assertThat(result,
+        table()
+        .row(CellMatcherFactory.cellMatcher(1.234, TypeMatchMode.STRICT, tolerance))
+        .matches();
+
+In this example the tolerance is 0.001. That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the 0.001.  

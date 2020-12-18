@@ -63,7 +63,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO CELL_VALUE_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
         assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
                 "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
-                        + " where content deviates starting row <2>, column <1>: \"bar\" was \"error_here\"");
+                        + " where content deviates starting row <2>, column <1>: expected was (an instance of java.lang.String and a value equal to \"bar\") but  was \"error_here\"");
     }
 
     @Test
@@ -73,7 +73,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         assertQueryResultNotMatched("SELECT * FROM CELL_TYPE_MISMATCH", table().row("foo", 1).row("bar", 2).matches(),
                 "ResultSet with <2> rows and <2> columns", "ResultSet with <2> rows and <2> columns" //
                         + " where content deviates starting row <1>, column <2>: " //
-                        + "an instance of java.lang.Integer <1> is a java.math.BigDecimal");
+                        + "expected was (an instance of java.lang.Integer and a value equal to <1>) but <1> is a java.math.BigDecimal");
     }
 
     @Test
@@ -117,11 +117,11 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     void testDetectCellValueFuzzyMismatch() {
         execute("CREATE TABLE CELL_VALUE_FUZZY_MISMATCH(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO CELL_VALUE_FUZZY_MISMATCH VALUES ('foo', 1), ('error_here', 2)");
-        assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_MISMATCH",
-                table().row("foo", 1).row("bar", 2).matchesFuzzily(),
-                "ResultSet with <2> rows and <2> columns (fuzzy match)", //
+        assertQueryResultNotMatched("SELECT * FROM CELL_VALUE_FUZZY_MISMATCH",
+                table().row("foo", 1).row("bar", 2).matches(TypeMatchMode.UPCAST_ONLY),
+                "ResultSet with <2> rows and <2> columns", //
                 "ResultSet with <2> rows and <2> columns" //
-                        + " where content deviates starting row <2>, column <1>: \"bar\" (java.lang.String) was \"error_here\" (java.lang.String)");
+                        + " where content deviates starting row <2>, column <1>: expected was (type that can safely be cast to java.lang.String and a value equal to \"bar\") but  was \"error_here\"");
     }
 
     @Test
