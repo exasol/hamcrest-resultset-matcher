@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.sql.*;
+import java.math.BigDecimal;
 
 import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,5 +130,44 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         execute("CREATE TABLE SIMPLE_TABLE_ONE_COLUMN(COL1 VARCHAR(20))");
         final ResultSet expected = query("SELECT * FROM SIMPLE_TABLE_ONE_COLUMN");
         assertFalse(table().matches().matches(expected));
+    }
+
+    @Test
+    void testDetectFloatingPointMismatch() {
+        execute("CREATE TABLE FLOAT_MISMATCH(COL1 FLOAT)");
+        execute("INSERT INTO FLOAT_MISMATCH VALUES (3.141592653589)");
+        assertQueryResultNotMatched("SELECT * FROM FLOAT_MISMATCH", table().row(3.1415926535899).matches(),
+                "ResultSet with <1> rows and <1> columns", //
+                "ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: " //
+                + "expected was (an instance of java.lang.Double and a value equal to <3.1415926535899>) but  was <3.141592653589>");
+    }
+
+    @Test
+    void testMatchWithDefaultTolerance() {
+        execute("CREATE TABLE SIMPLE_FLOATS_WITH_DEFAULT_TOLERANCE(COL1 FLOAT)");
+        execute("INSERT INTO SIMPLE_FLOATS_WITH_DEFAULT_TOLERANCE VALUES (2.71), (3.14)");
+        assertThat(query("SELECT * FROM SIMPLE_FLOATS_WITH_DEFAULT_TOLERANCE"), table().row(2.71).row(3.14).matches());
+    }
+
+    @Test
+    void testMatchWithToleranceValue() {
+        execute("CREATE TABLE SIMPLE_FLOATS_WITH_TOLERANCE(COL1 FLOAT)");
+        execute("INSERT INTO SIMPLE_FLOATS_WITH_TOLERANCE VALUES (26.81), (26.83)");
+        assertThat(query("SELECT * FROM SIMPLE_FLOATS_WITH_TOLERANCE"), table() //
+                .withDefaultNumberTolerance(BigDecimal.valueOf(0.015)) //
+                .row(26.82) //
+                .row(26.82) //
+                .matches());
+    }
+
+    @Test
+    void testMatchWithToleranceUsingCellMatcher() {
+        execute("CREATE TABLE SIMPLE_FLOATS_CELL_MATCHER(COL1 FLOAT)");
+        execute("INSERT INTO SIMPLE_FLOATS_CELL_MATCHER VALUES (1.34), (2.567998)");
+        final BigDecimal EPS = BigDecimal.valueOf(0.015);
+        assertThat(query("SELECT * FROM SIMPLE_FLOATS_CELL_MATCHER"), table() //
+                .row(CellMatcherFactory.cellMatcher(1.35, TypeMatchMode.STRICT, EPS)) //
+                .row(CellMatcherFactory.cellMatcher(2.567997, TypeMatchMode.STRICT, EPS)) //
+                .matches());
     }
 }
