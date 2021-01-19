@@ -200,8 +200,24 @@ We can do that by:
 final BigDecimal tolerance = BigDecimal.valueOf(0.001);
 assertThat(result,
         table()
-        .withTolerance(tolerance)
+        .withDefaultNumberTolerance(tolerance)
         .row(1.234)
+        .row(3.1415)
         .matches());
 
 In this example the tolerance is 0.001. That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the 0.001.  
+
+However, this applies the tolerance check to all values that are being matched.
+
+If you want to set the tolerance for the individual values, you can do so by using `cellMatcher`.
+
+```java
+final BigDecimal tolerance = BigDecimal.valueOf(0.001);
+assertThat(result,
+        table()
+        .row(CellMatcherFactory.cellMatcher(1.234, TypeMatchMode.STRICT, tolerance))
+        .row(3.1415)
+        .matches());
+```
+
+If you do not set any tolerance values, it uses by default `BigDecimal.ZERO`.
