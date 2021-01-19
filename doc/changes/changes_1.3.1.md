@@ -4,7 +4,7 @@
 
 ## Features / Enhancements
 
-* #27: Added withTolerance convenience method
+* #27: Added withDefaultNumberTolerance convenience method
 
 ## Dependency updates
 
