@@ -13,7 +13,7 @@ import org.hamcrest.Matcher;
  */
 public class CellMatcherFactory {
     private CellMatcherFactory() {
-        // empty ojn purpose
+        // empty on purpose
     }
 
     /**

@@ -39,6 +39,11 @@ class CellValueMatcherExasolIT extends AbstractCellValueMatcherTest {
         assertTypeStrictMatch("INTEGER", "1001", 1001L);
     }
 
+    @Test
+    void testMatchFloatToJavaFloatWithDefaultTolerance() {
+        assertTypeFuzzyMatch("FLOAT", "2.71", 2.71);
+    }
+
     @Override
     protected String getTestTableName() {
         return "TEST.T";

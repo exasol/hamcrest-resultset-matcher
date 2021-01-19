@@ -22,12 +22,14 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private int deviationStartRow;
     private final List<Column> actualColumns = new ArrayList<>();
     private final TypeMatchMode typeMatchMode;
+    private final BigDecimal tolerance;
     private final Description cellDescription = new StringDescription();
     private final Description cellMismatchDescription = new StringDescription();
 
     private ResultSetStructureMatcher(final Builder builder) {
         this.expectedColumns = builder.expectedColumns;
         this.typeMatchMode = builder.typeMatchMode;
+        this.tolerance = builder.tolerance;
         this.contentDeviates = false;
         this.cellMatcherTable = wrapExpectedValuesInMatchers(builder);
     }
@@ -52,7 +54,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 rowOfMatchers.add(castToMatcher(expectedCellValue));
             } else {
                 rowOfMatchers
-                        .add(CellMatcherFactory.cellMatcher(expectedCellValue, this.typeMatchMode, BigDecimal.ZERO));
+                        .add(CellMatcherFactory.cellMatcher(expectedCellValue, this.typeMatchMode, this.tolerance));
             }
         }
         return rowOfMatchers;
@@ -218,6 +220,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private int rows = 0;
         private List<Column> expectedColumns = new ArrayList<>();
         private TypeMatchMode typeMatchMode;
+        private BigDecimal tolerance = BigDecimal.ZERO;
 
         public Builder() {
         }
@@ -241,6 +244,17 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 validateColumnCount(length);
             }
             this.expectedTable.add(Arrays.asList(cellValues));
+            return this;
+        }
+
+        /**
+         * Adds a tolerance value for fuzzy matching floating point values.
+         *
+         * @param tolerance a tolerance value for matching floating point values
+         * @return {@code this} for fluent programming
+         */
+        public Builder withTolerance(final BigDecimal tolerance) {
+            this.tolerance = tolerance;
             return this;
         }
 
