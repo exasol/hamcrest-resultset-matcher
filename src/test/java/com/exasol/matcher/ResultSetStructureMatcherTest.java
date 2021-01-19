@@ -153,7 +153,11 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     void testMatchWithToleranceValue() {
         execute("CREATE TABLE SIMPLE_FLOATS_WITH_TOLERANCE(COL1 FLOAT)");
         execute("INSERT INTO SIMPLE_FLOATS_WITH_TOLERANCE VALUES (26.81), (26.83)");
-        assertThat(query("SELECT * FROM SIMPLE_FLOATS_WITH_TOLERANCE"), table().withTolerance(BigDecimal.valueOf(0.015)).row(26.82).row(26.82).matches());
+        assertThat(query("SELECT * FROM SIMPLE_FLOATS_WITH_TOLERANCE"), table() //
+                .withDefaultNumberTolerance(BigDecimal.valueOf(0.015)) //
+                .row(26.82) //
+                .row(26.82) //
+                .matches());
     }
 
     @Test

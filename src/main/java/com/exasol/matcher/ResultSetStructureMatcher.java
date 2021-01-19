@@ -253,7 +253,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          * @param tolerance a tolerance value for matching floating point values
          * @return {@code this} for fluent programming
          */
-        public Builder withTolerance(final BigDecimal tolerance) {
+        public Builder withDefaultNumberTolerance(final BigDecimal tolerance) {
             this.tolerance = tolerance;
             return this;
         }
