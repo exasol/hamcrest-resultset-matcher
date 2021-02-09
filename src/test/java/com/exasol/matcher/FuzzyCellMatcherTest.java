@@ -16,6 +16,11 @@ class FuzzyCellMatcherTest {
     }
 
     @Test
+    void testMatchSqlDateAndUtilDate() {
+        assertTrue(FuzzyCellMatcher.fuzzilyEqualTo(new Date(1001)).matches(new java.util.Date(1001)));
+    }
+
+    @Test
     void testMatchDateAndTimestamp() {
         assertTrue(FuzzyCellMatcher.fuzzilyEqualTo(new Date(1001)).matches(new Timestamp(1001)));
     }
@@ -38,5 +43,10 @@ class FuzzyCellMatcherTest {
     @Test
     void testMismatchDateAndString() {
         assertFalse(FuzzyCellMatcher.fuzzilyEqualTo(new Date(1001)).matches("other"));
+    }
+
+    @Test
+    void testMisMatchSqlDateAndUtilDate() {
+        assertFalse(FuzzyCellMatcher.fuzzilyEqualTo(new Date(1001)).matches(new java.util.Date(1002)));
     }
 }
