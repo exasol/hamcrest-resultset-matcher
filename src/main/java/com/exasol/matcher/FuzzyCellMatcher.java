@@ -74,6 +74,10 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
             } catch (final NumberFormatException exception) {
                 return defaultCompare(actual);
             }
+        } else if (actual instanceof java.util.Date && this.expected instanceof java.util.Date) {
+            final java.util.Date actualDate = (java.util.Date) actual;
+            final java.util.Date expectedDate = (java.util.Date) this.expected;
+            return actualDate.compareTo(expectedDate) == 0;
         } else {
             return defaultCompare(actual);
         }
