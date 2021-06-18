@@ -1,6 +1,6 @@
-# Hamcrest Result Set Matcher.
+# Hamcrest Result Set Matcher
 
-[![Build Status](https://travis-ci.com/exasol/hamcrest-resultset-matcher.svg?branch=master)](https://travis-ci.org/exasol/hamcrest-resultset-matcher)
+[![Build Status](https://travis-ci.com/exasol/hamcrest-resultset-matcher.svg?branch=main)](https://travis-ci.com/exasol/hamcrest-resultset-matcher)
 [![Maven Central](https://img.shields.io/maven-central/v/com.exasol/hamcrest-resultset-matcher)](https://search.maven.org/artifact/com.exasol/hamcrest-resultset-matcher)
 
 SonarCloud results:
