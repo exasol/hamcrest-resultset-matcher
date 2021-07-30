@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher</url>
@@ -12,7 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <junit.version>5.7.0</junit.version>
+        <junit.version>5.7.2</junit.version>
         <maven.surefire.version>3.0.0-M3</maven.surefire.version>
         <gpg.skip>true</gpg.skip>
     </properties>
@@ -89,25 +89,26 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>3.4.1</version>
+            <version>4.0.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.15.1</version>
+            <version>1.16.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency><!-- override testconatainers dependency to fix github release (https://github.com/exasol/exasol-testcontainers/issues/122)-->
+        <dependency>
+            <!-- override testconatainers dependency to fix github release (https://github.com/exasol/exasol-testcontainers/issues/122)-->
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.15.1</version>
+            <version>1.16.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.15.1</version>
+            <version>1.16.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -140,18 +141,32 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>merge-results</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}/</directory>
+                                    <includes>
+                                        <include>jacoco*.exec</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                            <destFile>${project.build.directory}/aggregate.exec</destFile>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>report-integration</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-integration</goal>
-                        </goals>
+                        <configuration>
+                            <dataFile>${project.build.directory}/aggregate.exec</dataFile>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -161,7 +176,7 @@
                 <version>${maven.surefire.version}</version>
                 <configuration>
                     <!-- Set the highest log level for coverage testing, so that we
-                      have a chance to reach branches in the logging lambdas too. -->
+                                have a chance to reach branches in the logging lambdas too. -->
                     <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
                     <excludes>
                         <exclude>**IT.java</exclude>
@@ -280,7 +295,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>0.4.2</version>
+                <version>0.10.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -301,7 +316,7 @@
                 <version>${maven.surefire.version}</version>
                 <configuration>
                     <!-- Set the highest log level for coverage testing, so that we have a chance to reach branches
-                      <property>	                      in the logging lambdas too. -->
+                                <property>	                      in the logging lambdas too. -->
                     <argLine>-Djava.util.logging.config.file=src/test/resources/logging.properties ${argLine}</argLine>
                     <includes>
                         <include>**IT.java</include>
@@ -338,6 +353,32 @@
                         <phase>deploy</phase>
                         <goals>
                             <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.exasol</groupId>
+                <artifactId>error-code-crawler-maven-plugin</artifactId>
+                <version>0.1.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.github.zlika</groupId>
+                <artifactId>reproducible-build-maven-plugin</artifactId>
+                <version>0.13</version>
+                <executions>
+                    <execution>
+                        <id>strip-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>strip-jar</goal>
                         </goals>
                     </execution>
                 </executions>
