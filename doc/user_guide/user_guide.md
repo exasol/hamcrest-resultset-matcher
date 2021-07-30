@@ -204,6 +204,7 @@ final BigDecimal tolerance=BigDecimal.valueOf(0.001);
         .row(1.234)
         .row(3.1415)
         .matches());
+```
 
         In this example the tolerance is0.001.That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the0.001.
 
