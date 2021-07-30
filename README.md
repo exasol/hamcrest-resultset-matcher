@@ -108,4 +108,3 @@ This software is licensed under the [MIT license](LICENSE).
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
 [maven-failsafe-plugin]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [project-keeper]: https://github.com/exasol/project-keeper-maven-plugin
-[exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
