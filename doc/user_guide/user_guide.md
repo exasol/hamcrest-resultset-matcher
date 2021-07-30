@@ -1,6 +1,6 @@
 # Hamcrest ResultSet Matcher User Guide
 
-The `ResultSet` matcher is the implementation of a [Java Hamcrest matcher](JavaHamcrest). The Hamcrest (an anagram of "matchers") suite is a collection of matchers that aim to be written declaratively and provide better than average diagnostics messages in case of mismatches.
+The `ResultSet` matcher is the implementation of a [Java Hamcrest matcher](http://hamcrest.org/JavaHamcrest/). The Hamcrest (an anagram of "matchers") suite is a collection of matchers that aim to be written declaratively and provide better than average diagnostics messages in case of mismatches.
 
 This particular matcher helps testers to validate the contents of [JDBC result sets](https://docs.oracle.com/en/java/javase/11/docs/api/java.sql/java/sql/ResultSet.html). Checking result sets is a typical part of integration testing Java database applications.
 
@@ -197,8 +197,8 @@ When comparing floating-point numbers you might want to compare the actual value
 We can do that by:
 
 ```java
-final BigDecimal tolerance = BigDecimal.valueOf(0.001);
-assertThat(result,
+final BigDecimal tolerance=BigDecimal.valueOf(0.001);
+        assertThat(result,
         table()
         .withDefaultNumberTolerance(tolerance)
         .row(1.234)
@@ -206,17 +206,17 @@ assertThat(result,
         .matches());
 ```
 
-In this example the tolerance is 0.001. That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the 0.001.  
+        In this example the tolerance is0.001.That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the0.001.
 
-However, this applies the tolerance check to all values that are being matched.
+        However,this applies the tolerance check to all values that are being matched.
 
-If you want to set the tolerance for the individual values, you can do so by using `cellMatcher`.
+        If you want to set the tolerance for the individual values,you can do so by using `cellMatcher`.
 
-```java
-final BigDecimal tolerance = BigDecimal.valueOf(0.001);
-assertThat(result,
+        ```java
+final BigDecimal tolerance=BigDecimal.valueOf(0.001);
+        assertThat(result,
         table()
-        .row(CellMatcherFactory.cellMatcher(1.234, TypeMatchMode.STRICT, tolerance))
+        .row(CellMatcherFactory.cellMatcher(1.234,TypeMatchMode.STRICT,tolerance))
         .row(3.1415)
         .matches());
 ```

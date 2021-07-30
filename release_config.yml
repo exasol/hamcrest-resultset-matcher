@@ -1,0 +1,14 @@
+release-platforms:
+  - GitHub
+  - Maven
+  - Community
+  - Jira
+community-tags:
+  - Integration testing
+  - Java
+  - Testing
+community-project-name: Hamcrest Result Set Matcher
+community-project-description: |
+  Our open-source project [Hamcrest Result Set Matcher](https://github.com/exasol/hamcrest-resultset-matcher) provides a Hamcrest matcher that compares the JDBC result sets (java.sql.ResultSet) against each other or against Java structures. It helps us to write clean integration tests faster and more conveniently.
+
+  If you want to learn more about Result Set Matcher, please refer to the [user guide](https://github.com/exasol/hamcrest-resultset-matcher/blob/master/doc/user_guide/user_guide.md).
