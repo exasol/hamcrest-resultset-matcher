@@ -1,5 +1,4 @@
 <!-- @formatter:off -->
-
 # Dependencies
 
 ## Compile Dependencies
@@ -46,67 +45,35 @@
 | [Maven Site Plugin 3][54]                               | [The Apache Software License, Version 2.0][7] |
 
 [18]: https://www.eclemma.org/jacoco/index.html
-
 [34]: https://github.com/exasol/project-keeper-maven-plugin
-
 [7]: http://www.apache.org/licenses/LICENSE-2.0.txt
-
 [20]: https://maven.apache.org/surefire/maven-surefire-plugin/
-
 [40]: http://www.sonatype.com/public-parent/nexus-maven-plugins/nexus-staging/nexus-staging-maven-plugin/
-
 [46]: http://maven.apache.org/plugins/maven-clean-plugin/
-
 [6]: http://db.apache.org/derby/
-
 [9]: https://opensource.org/licenses/MIT
-
 [36]: https://maven.apache.org/surefire/maven-failsafe-plugin/
-
 [30]: http://www.mojohaus.org/versions-maven-plugin/
-
 [1]: http://opensource.org/licenses/BSD-3-Clause
-
 [16]: https://maven.apache.org/plugins/maven-compiler-plugin/
-
 [11]: http://opensource.org/licenses/MIT
-
 [26]: http://maven.apache.org/plugins/maven-gpg-plugin/
-
 [19]: https://www.eclipse.org/legal/epl-2.0/
-
 [41]: http://www.eclipse.org/legal/epl-v10.html
-
 [8]: https://github.com/exasol/exasol-testcontainers
-
 [44]: http://zlika.github.io/reproducible-build-maven-plugin
-
 [50]: http://maven.apache.org/plugins/maven-jar-plugin/
-
 [17]: https://www.apache.org/licenses/LICENSE-2.0.txt
-
 [32]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
-
 [3]: https://www.eclipse.org/legal/epl-v20.html
-
 [52]: http://maven.apache.org/plugins/maven-install-plugin/
-
 [2]: https://junit.org/junit5/
-
 [28]: https://sonatype.github.io/ossindex-maven/maven-plugin/
-
 [10]: https://testcontainers.org
-
 [22]: https://maven.apache.org/plugins/maven-source-plugin/
-
 [0]: http://hamcrest.org/JavaHamcrest/
-
 [38]: http://maven.apache.org/plugins/maven-deploy-plugin/
-
 [54]: http://maven.apache.org/plugins/maven-site-plugin/
-
 [48]: http://maven.apache.org/plugins/maven-resources-plugin/
-
 [24]: https://maven.apache.org/plugins/maven-javadoc-plugin/
-
 [42]: https://github.com/exasol/error-code-crawler-maven-plugin
