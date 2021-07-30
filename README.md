@@ -32,7 +32,7 @@ import static com.exasol.matcher.ResultSetStructurMatcher.*;
 void testCustomerTableContents() {
     // Preparation: Create a JDBC statement and store the reference in variable 'statement'
     
-    final ResulSet result = statement.execute("SELECT * FROM CUSTOMERS");
+    final ResulSet result = statement.executeQuery("SELECT * FROM CUSTOMERS");
     assertThat(result, table("INTEGER", "VARCHAR", "VARCHAR")
             .row(1, "JOHN", "DOE")
             .row(2, "JANE", "SMITH)
@@ -108,4 +108,3 @@ This software is licensed under the [MIT license](LICENSE).
 [versions-maven-plugin]: https://www.mojohaus.org/versions-maven-plugin/
 [maven-failsafe-plugin]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [project-keeper]: https://github.com/exasol/project-keeper-maven-plugin
-[exasol-testcontainers]: https://github.com/exasol/exasol-testcontainers
