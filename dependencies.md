@@ -75,5 +75,5 @@
 [38]: http://maven.apache.org/plugins/maven-deploy-plugin/
 [54]: http://maven.apache.org/plugins/maven-site-plugin/
 [48]: http://maven.apache.org/plugins/maven-resources-plugin/
-[24]: https://maven.apache.org/plugins/maven-javadoc-plugin/    
+[24]: https://maven.apache.org/plugins/maven-javadoc-plugin/
 [42]: https://github.com/exasol/error-code-crawler-maven-plugin
