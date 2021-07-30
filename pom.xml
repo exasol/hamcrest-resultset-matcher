@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher</url>
@@ -95,6 +95,18 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>1.15.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency><!-- override testconatainers dependency to fix github release (https://github.com/exasol/exasol-testcontainers/issues/122)-->
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.15.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>jdbc</artifactId>
             <version>1.15.1</version>
             <scope>test</scope>
         </dependency>
