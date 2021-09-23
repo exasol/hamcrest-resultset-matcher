@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.sql.*;
 import java.math.BigDecimal;
+import java.sql.*;
 
 import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,7 +139,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         assertQueryResultNotMatched("SELECT * FROM FLOAT_MISMATCH", table().row(3.1415926535899).matches(),
                 "ResultSet with <1> rows and <1> columns", //
                 "ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: " //
-                + "expected was (an instance of java.lang.Double and a value equal to <3.1415926535899>) but  was <3.141592653589>");
+                        + "expected was (an instance of java.lang.Double and a value equal to <3.1415926535899>) but  was <3.141592653589>");
     }
 
     @Test
