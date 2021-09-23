@@ -1,0 +1,4 @@
+error-tags:
+  HRM:
+    packages:
+      - com.exasol.matcher

@@ -206,19 +206,52 @@ final BigDecimal tolerance=BigDecimal.valueOf(0.001);
         .matches());
 ```
 
-        In this example the tolerance is0.001.That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the0.001.
+In this example the tolerance is0.001.That means that the `ResultSetStructureMatcher` considers two numbers as equal if their absolute difference is smaller than the0.001.
 
-        However,this applies the tolerance check to all values that are being matched.
+However,this applies the tolerance check to all values that are being matched.
 
-        If you want to set the tolerance for the individual values,you can do so by using `cellMatcher`.
+If you want to set the tolerance for the individual values,you can do so by using `cellMatcher`.
 
-        ```java
+```java
+
 final BigDecimal tolerance=BigDecimal.valueOf(0.001);
-        assertThat(result,
-        table()
+        assertThat(result,table()
         .row(CellMatcherFactory.cellMatcher(1.234,TypeMatchMode.STRICT,tolerance))
         .row(3.1415)
         .matches());
+
 ```
 
 If you do not set any tolerance values, it uses by default `BigDecimal.ZERO`.
+
+### Matching `Date` and `Timestamp`
+
+When retrieving a `Date` or `Timestamp` from a database JDBC adapters use a `Calendar` to encode the date structure from the database into a the Unix-Timestamp stored in the `Date` or `Timestamp` object. Usually you set a calendar in the `getTimestamp(int columnIndex, Calendar cal)` method of the JDBC adapter. If you don't specify a timestamp there the JDBC adapter uses the Timezone of you test-computer. That's dangerous since it can be different for different developers or CI setups.
+
+When you use this matcher it retrieves the column values from the result set, so you can not use the `getTimestamp` method yourself. For that reason you can configure a UTC calendar the matcher uses for reading `Date` and `Timestamp` values:
+
+```java
+
+assertThat(result,table()
+        .row(new Timestamp(123456))
+        .withUtcCalendar()
+        .matches());
+```
+
+You can also specify a specific calendar using `withCalendar(Calendar)`.
+
+If you don't specify a calendar the matcher uses the default calendar of your system (just like the JDBC driver). We strongly recommend not to do so!
+It's however the default behaviour for backward compatibility. In that case the matcher displays a warning when reading a column without configured calendar.
+
+### Display `Date` and `Timestamp`
+
+Even so the Java classes `java.sql.Date` and `java.sql.Timestamp` represent a UTC value, their `toString()` method displays the date in the time-zone of the test system. That can easily lead to confusion. For that reason, this matcher instead prints them in UTC when the expected values mismatch.
+
+Example:
+
+```
+Expected: a value equal to "2021-09-22T14:21:58Z"
+     but:  was "2021-09-22T14:16:58Z"
+```
+
+You can see that it's UTC by the `Z`.

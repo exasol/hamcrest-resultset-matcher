@@ -3,8 +3,11 @@ package com.exasol.matcher;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 import org.hamcrest.*;
+
+import com.exasol.errorreporting.ExaError;
 
 /**
  * Hamcrest matcher that compares JDBC result sets against Java object structures.
@@ -16,6 +19,9 @@ import org.hamcrest.*;
 public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private final List<List<Matcher<?>>> cellMatcherTable;
     private final List<Column> expectedColumns;
+    private static final Logger LOGGER = Logger.getLogger(ResultSetStructureMatcher.class.getName());
+    private final Calendar calendar;
+    private boolean isCalendarWarningDisplayed;
     private int actualRowCount;
     private boolean contentDeviates;
     private int deviationStartColumn;
@@ -30,8 +36,10 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         this.expectedColumns = builder.expectedColumns;
         this.typeMatchMode = builder.typeMatchMode;
         this.tolerance = builder.tolerance;
+        this.calendar = builder.calendar;
         this.contentDeviates = false;
         this.cellMatcherTable = wrapExpectedValuesInMatchers(builder);
+        this.isCalendarWarningDisplayed = false;
     }
 
     private List<List<Matcher<?>>> wrapExpectedValuesInMatchers(final Builder builder) {
@@ -162,16 +170,52 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         try {
             for (final Matcher<?> cellMatcher : cellMatcherRow) {
                 ++columnIndex;
-                final Object value = resultSet.getObject(columnIndex);
+                final Object value = readCellValue(resultSet, columnIndex);
                 if (!matchCell(value, cellMatcher, rowIndex, columnIndex)) {
                     return false;
                 }
             }
         } catch (final SQLException exception) {
             throw new AssertionError("Unable to read actual result set value in row " + rowIndex + ", column "
-                    + columnIndex + ": " + exception.getMessage());
+                    + columnIndex + ": " + exception.getMessage(), exception);
         }
         return true;
+    }
+
+    private Object readCellValue(final ResultSet resultSet, final int columnIndex) throws SQLException {
+        final Object value = resultSet.getObject(columnIndex);
+        if (value instanceof java.sql.Timestamp) {
+            displayCalendarWarningIfRequired();
+            if (this.calendar != null) {
+                return resultSet.getTimestamp(columnIndex, this.calendar);
+            } else {
+                return value;
+            }
+        } else if (value instanceof java.sql.Date) {
+            displayCalendarWarningIfRequired();
+            if (this.calendar != null) {
+                return resultSet.getDate(columnIndex, this.calendar);
+            } else {
+                return value;
+            }
+        } else {
+            return value;
+        }
+    }
+
+    private void displayCalendarWarningIfRequired() {
+        if (this.calendar == null && !this.isCalendarWarningDisplayed) {
+            displayCalendarWarning();
+        }
+    }
+
+    private void displayCalendarWarning() {
+        LOGGER.warning(() -> ExaError.messageBuilder("W-HRM-1").message(
+                "Reading a timestamp or date value without configured calendar. That's dangerous since the JDBC driver is using the time-zone of the test system in that case.")
+                .mitigation(
+                        "You can fix this by providing a calendar using 'withCalendar(Calendar)'. For example 'Calendar.getInstance(TimeZone.getTimeZone(\"UTC\")'.")
+                .toString());
+        this.isCalendarWarningDisplayed = true;
     }
 
     private boolean matchCell(final Object value, final Matcher<?> cellMatcher, final int rowIndex,
@@ -221,9 +265,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private List<Column> expectedColumns = new ArrayList<>();
         private TypeMatchMode typeMatchMode;
         private BigDecimal tolerance = BigDecimal.ZERO;
-
-        public Builder() {
-        }
+        private Calendar calendar;
 
         public void addExpectedColumn(final Column expectedColumn) {
             this.expectedColumns.add(expectedColumn);
@@ -270,6 +312,28 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 throw new AssertionError("Error constructing expected row " + this.rows + ". Expected "
                         + this.expectedColumns.size() + " columns, but got " + length + ".");
             }
+        }
+
+        /**
+         * Set a calendar to use for decoding the value of {@code TIMESTAMP}, {@code TIMESTAMP WITH LOCAL TIME ZONE},
+         * and {@code DATE} columns.
+         * 
+         * @param calendar calendar to use
+         * @return self for fluent programming
+         */
+        public Builder withCalendar(final Calendar calendar) {
+            this.calendar = calendar;
+            return this;
+        }
+
+        /**
+         * This method configure the matcher to use a UTC calendar for decoding the value of {@code TIMESTAMP},
+         * {@code TIMESTAMP WITH LOCAL TIME ZONE}, and {@code DATE} columns.
+         *
+         * @return self for fluent programming
+         */
+        public Builder withUtcCalendar() {
+            return withCalendar(Calendar.getInstance(TimeZone.getTimeZone("UTC")));
         }
 
         /**

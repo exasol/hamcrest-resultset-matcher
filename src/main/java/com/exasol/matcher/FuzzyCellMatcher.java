@@ -1,6 +1,11 @@
 package com.exasol.matcher;
 
 import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -74,10 +79,12 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
             } catch (final NumberFormatException exception) {
                 return defaultCompare(actual);
             }
-        } else if (actual instanceof java.util.Date && this.expected instanceof java.util.Date) {
-            final java.util.Date actualDate = (java.util.Date) actual;
-            final java.util.Date expectedDate = (java.util.Date) this.expected;
-            return actualDate.compareTo(expectedDate) == 0;
+        } else if (actual instanceof java.sql.Date && this.expected instanceof java.util.Date) {
+            final Instant actualDate = Instant.ofEpochMilli(((java.sql.Date) actual).getTime())
+                    .truncatedTo(ChronoUnit.DAYS);
+            final Instant expectedDate = Instant.ofEpochMilli(((java.util.Date) this.expected).getTime())
+                    .truncatedTo(ChronoUnit.DAYS);
+            return actualDate.equals(expectedDate);
         } else {
             return defaultCompare(actual);
         }
@@ -109,7 +116,30 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
                     .appendValue(this.tolerance).appendText(")");
         } else {
             description.appendText("a value equal to ");
-            description.appendValue(this.expected);
+            description.appendValue(improveToStringOfTimestampAndDate(this.expected));
+        }
+    }
+
+    /**
+     * Improve the string representation of {@link Timestamp} and {@link Date}.
+     * <p>
+     * The {@code toString} method of {@link Timestamp} and {@link Date} are dependent of the system timezone while the
+     * values are not. That can be confusing for testing. For that reason, we decided to print the values in UTC here.
+     * Testers can notice that by the {@code Z} at the end of the timestamp.
+     * </p>
+     * 
+     * @param actual object to improve.
+     * @return object or string
+     */
+    private Object improveToStringOfTimestampAndDate(final Object actual) {
+        if (actual instanceof Timestamp) {
+            return ((Timestamp) actual).toInstant().toString();
+        } else if (actual instanceof Date) {
+            final OffsetDateTime dateTime = Instant.ofEpochMilli(((Date) actual).getTime()).truncatedTo(ChronoUnit.DAYS)
+                    .atOffset(ZoneOffset.UTC);
+            return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        } else {
+            return actual;
         }
     }
 
@@ -120,7 +150,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     @Override
     public void describeMismatch(final Object item, final Description description) {
         description.appendText(" was ") //
-                .appendValue(item);
+                .appendValue(improveToStringOfTimestampAndDate(item));
         if (isMatchingWithToleranceEnabled() && this.lastDifference != null) {
             description.appendText(" difference was ").appendValue(this.lastDifference);
         }
