@@ -123,7 +123,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     /**
      * Improve the string representation of {@link Timestamp} and {@link Date}.
      * <p>
-     * The toString method of {@link Timestamp} and {@link Date} and date are dependant of the system timezone while the
+     * The {@code toString} method of {@link Timestamp} and {@link Date} are dependent of the system timezone while the
      * values are not. That can be confusing for testing. For that reason, we decided to print the values in UTC here.
      * Testers can notice that by the {@code Z} at the end of the timestamp.
      * </p>
