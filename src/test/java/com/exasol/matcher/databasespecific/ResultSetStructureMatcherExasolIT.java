@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.*;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -42,6 +43,37 @@ class ResultSetStructureMatcherExasolIT extends AbstractResultSetMatcherTest {
         assertThat(query("SELECT * FROM TEST.T"), table() //
                 .row(expected) //
                 .withUtcCalendar()//
+                .matches());
+    }
+
+    @Test
+    void testMatchTimestampWithoutCalendar() {
+        execute("CREATE TABLE TEST.T(COL1 TIMESTAMP)");
+        execute("INSERT INTO TEST.T VALUES (TIMESTAMP '2007-03-31 12:59:30.123')");
+        final Date expected = new Date(1175345970123L);
+        assertThat(query("SELECT * FROM TEST.T"), table() //
+                .row(Matchers.anything()) //
+                .matches());
+    }
+
+    @Test
+    void testMatchDateWithCalendar() {
+        execute("CREATE TABLE TEST.T(COL1 DATE)");
+        execute("INSERT INTO TEST.T VALUES (DATE '2007-03-31')");
+        final Date expected = new Date(1175345970123L);
+        assertThat(query("SELECT * FROM TEST.T"), table() //
+                .row(expected) //
+                .withUtcCalendar()//
+                .matches());
+    }
+
+    @Test
+    void testMatchDateWithoutCalendar() {
+        execute("CREATE TABLE TEST.T(COL1 DATE)");
+        execute("INSERT INTO TEST.T VALUES (DATE '2007-03-31')");
+        final Date expected = new Date(1175345970123L);
+        assertThat(query("SELECT * FROM TEST.T"), table() //
+                .row(Matchers.anything()) //
                 .matches());
     }
 }

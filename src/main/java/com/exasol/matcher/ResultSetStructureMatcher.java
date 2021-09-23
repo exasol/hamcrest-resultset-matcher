@@ -21,7 +21,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private final List<Column> expectedColumns;
     private static final Logger LOGGER = Logger.getLogger(ResultSetStructureMatcher.class.getName());
     private final Calendar calendar;
-    private boolean wasCalendarWaringDisplayed;
+    private boolean isCalendarWarningDisplayed;
     private int actualRowCount;
     private boolean contentDeviates;
     private int deviationStartColumn;
@@ -39,7 +39,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         this.calendar = builder.calendar;
         this.contentDeviates = false;
         this.cellMatcherTable = wrapExpectedValuesInMatchers(builder);
-        this.wasCalendarWaringDisplayed = false;
+        this.isCalendarWarningDisplayed = false;
     }
 
     private List<List<Matcher<?>>> wrapExpectedValuesInMatchers(final Builder builder) {
@@ -204,7 +204,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private void displayCalendarWarningIfRequired() {
-        if (this.calendar == null && !this.wasCalendarWaringDisplayed) {
+        if (this.calendar == null && !this.isCalendarWarningDisplayed) {
             displayCalendarWarning();
         }
     }
@@ -215,7 +215,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 .mitigation(
                         "You can fix this by providing a calendar using 'withCalendar(Calendar)'. For example 'Calendar.getInstance(TimeZone.getTimeZone(\"UTC\")'.")
                 .toString());
-        this.wasCalendarWaringDisplayed = true;
+        this.isCalendarWarningDisplayed = true;
     }
 
     private boolean matchCell(final Object value, final Matcher<?> cellMatcher, final int rowIndex,
