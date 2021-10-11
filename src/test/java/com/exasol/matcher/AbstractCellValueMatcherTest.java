@@ -15,9 +15,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * This class contains abstract tests for the matching of cell values.
  * <p>
- * The reason for this class being an abstract test is, that some behaviour can only be reproduced using certain
+ * The reason for this class being an abstract test is, that some behavior can only be reproduced using certain
  * databases, since different databases use different JDBC return types. For that reason it is important to test the
- * implementation for different databases. The {@link CellValueMatcherTest} is a unit test using the derby JDBC
+ * implementation for different databases. The {@code CellValueMatcherIT} is an integration test using the derby JDBC
  * connector. The {@link com.exasol.matcher.databasespecific} package contains the database specific integration tests.
  * </p>
  */
@@ -47,7 +47,7 @@ public abstract class AbstractCellValueMatcherTest extends AbstractResultSetMatc
     /**
      * Get the fully qualified name for a table to use in tests. If the name contains a schema or catalog the schema
      * must exist.
-     * 
+     *
      * @return name for a table
      */
     protected abstract String getTestTableName();

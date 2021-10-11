@@ -8,7 +8,10 @@ import java.sql.*;
 
 import org.junit.jupiter.api.*;
 
-class CellValueMatcherTest extends AbstractCellValueMatcherTest {
+/**
+ * This integration test runs cell content matching tests against the Apache Derby database.
+ */
+class CellValueMatcherIT extends AbstractCellValueMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         final Connection connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
@@ -65,8 +68,9 @@ class CellValueMatcherTest extends AbstractCellValueMatcherTest {
     void testFuzzyMismatchVarcharToInt() {
         final AssertionError assertionError = assertTypeFuzzyMismatch("VARCHAR(5)", "'test'",
                 FuzzyCellMatcher.fuzzilyEqualTo(12));
-        assertThat(assertionError.getMessage(), equalTo(
-                "\nExpected: ResultSet with <1> rows and <1> columns\n     but: ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: expected was a value equal to <12> but  was \"test\""));
+        assertThat(assertionError.getMessage(), equalTo("\nExpected: ResultSet with <1> rows and <1> columns\n     "
+                + "but: ResultSet with <1> rows and <1> columns where content deviates starting row <1>, column <1>: "
+                + "expected was a value equal to <12> but  was \"test\""));
     }
 
     @Test
@@ -78,4 +82,10 @@ class CellValueMatcherTest extends AbstractCellValueMatcherTest {
     void testFuzzyUpcastOnlyMatchToLong() {
         assertTypeFuzzyMatch("INTEGER", "12", UpcastOnlyCellMatcher.isOnlyUpcastTo(12L));
     }
+
+    @Test
+    void testFuzzyMatchNullValue() {
+        assertTypeFuzzyMatch("VARCHAR(10)", null, FuzzyCellMatcher.fuzzilyEqualTo(null));
+    }
+
 }

@@ -70,4 +70,22 @@ class FuzzyCellMatcherTest {
         assertThat(assertionError.getMessage(),
                 equalTo("\nExpected: a value equal to \"2021-09-24\"\n     but:  was \"2021-09-22\""));
     }
+
+    @Test
+    void testNullStringMatch() {
+        final String nullValue = null;
+        assertThat(nullValue, FuzzyCellMatcher.fuzzilyEqualTo(nullValue));
+    }
+
+    @Test
+    void testNullIntegerMatch() {
+        final Integer nullValue = null;
+        assertThat(nullValue, FuzzyCellMatcher.fuzzilyEqualTo(nullValue));
+    }
+
+    @Test
+    void testBooleanIntegerMatch() {
+        final Integer nullValue = null;
+        assertThat(nullValue, FuzzyCellMatcher.fuzzilyEqualTo(nullValue));
+    }
 }
