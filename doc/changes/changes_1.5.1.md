@@ -15,3 +15,7 @@ Version 1.5.1 of the `hamcrest-result-matcher` fixes value matching in case the 
 ### Test Dependency Updates
 
 * Updated `com.exasol:exasol-testcontainers:5.0.0` to `5.1.0`
+
+### Plugin Dependency Updates
+
+* Updated `com.exasol:error-code-crawler-maven-plugin:0.6.0` to `0.7.0`
