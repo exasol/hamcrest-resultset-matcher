@@ -104,7 +104,7 @@
             <version>0.4.0</version>
         </dependency>
         <dependency>
-            <!-- override testconatainers dependency to fix github release (https://github.com/exasol/exasol-testcontainers/issues/122)-->
+            <!-- override testcontainers dependency to fix GitHub release (https://github.com/exasol/exasol-testcontainers/issues/122)-->
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
             <version>1.16.0</version>
@@ -365,7 +365,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>error-code-crawler-maven-plugin</artifactId>
-                <version>0.6.0</version>
+                <version>0.7.0</version>
                 <executions>
                     <execution>
                         <goals>

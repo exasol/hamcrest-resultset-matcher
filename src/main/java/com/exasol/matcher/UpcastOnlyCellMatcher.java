@@ -32,13 +32,12 @@ public class UpcastOnlyCellMatcher<T> extends BaseMatcher<T> {
         this.lastMismatch = null;
         if (actual == null) {
             return this.expected == null;
+        } else if ((actual instanceof Number) && (this.expected instanceof Number)) {
+            return checkNumbersAreOnlyUpcasted(actual, this.expected);
         } else {
-            if ((actual instanceof Number) && (this.expected instanceof Number)) {
-                return checkNumbersAreOnlyUpcasted(actual, this.expected);
-            } else {
-                return actual.getClass().equals(this.expected.getClass());
-            }
+            return actual.getClass().equals(this.expected.getClass());
         }
+
     }
 
     private UpcastOnlyCellMatcher(final T expected) {
