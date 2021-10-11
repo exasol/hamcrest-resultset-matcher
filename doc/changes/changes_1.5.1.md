@@ -1,6 +1,6 @@
 # Matcher for SQL Result Sets 1.5.1, released 2021-10-12
 
-Code name: null-value matching
+Code name: Null-Value Matching
 
 ## Summary
 
@@ -8,7 +8,7 @@ Version 1.5.1 of the `hamcrest-result-matcher` fixes value matching in case the 
 
 ## Features
 
-* 37: Fix matching of `null` values
+* #37: Fix matching of `null` values
 
 ## Dependency Updates
 
