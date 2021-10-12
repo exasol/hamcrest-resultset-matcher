@@ -6,6 +6,8 @@ import org.hamcrest.*;
 
 /**
  * This Hamcrest matcher improves upon the error reporting of the {@link org.hamcrest.core.AllOf} matcher.
+ *
+ * @param <T> matcher type
  */
 public class EnhancedAllOfMatcher<T> extends DiagnosingMatcher<T> {
     private final Iterable<Matcher<? super T>> matchers;

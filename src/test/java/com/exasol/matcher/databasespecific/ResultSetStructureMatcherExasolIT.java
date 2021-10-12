@@ -2,6 +2,7 @@ package com.exasol.matcher.databasespecific;
 
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.sql.*;
 
@@ -46,14 +47,16 @@ class ResultSetStructureMatcherExasolIT extends AbstractResultSetMatcherTest {
                 .matches());
     }
 
+    // Testing without calendar is dangerous, because while you might assume you are testing a bare timestamp, Java
+    // actually adds the client calendar. This way match results are not guaranteed. This is why we only ensure that
+    // no exception falls here.
     @Test
-    void testMatchTimestampWithoutCalendar() {
+    void testMatchTimestampWithoutCalendar() throws SQLException {
         execute("CREATE TABLE TEST.T(COL1 TIMESTAMP)");
         execute("INSERT INTO TEST.T VALUES (TIMESTAMP '2007-03-31 12:59:30.123')");
-        final Date expected = new Date(1175345970123L);
-        assertThat(query("SELECT * FROM TEST.T"), table() //
-                .row(Matchers.anything()) //
-                .matches());
+        try (final ResultSet resultSet = query("SELECT * FROM TEST.T")) {
+            assertDoesNotThrow(() -> table().row(Matchers.anything()).matches().matches(resultSet));
+        }
     }
 
     @Test
@@ -67,13 +70,15 @@ class ResultSetStructureMatcherExasolIT extends AbstractResultSetMatcherTest {
                 .matches());
     }
 
+    // Testing without calendar is dangerous, because while you might assume you are testing a bare timestamp, Java
+    // actually adds the client calendar. This way match results are not guaranteed. This is why we only ensure that
+    // no exception falls here.
     @Test
-    void testMatchDateWithoutCalendar() {
+    void testMatchDateWithoutCalendar() throws SQLException {
         execute("CREATE TABLE TEST.T(COL1 DATE)");
         execute("INSERT INTO TEST.T VALUES (DATE '2007-03-31')");
-        final Date expected = new Date(1175345970123L);
-        assertThat(query("SELECT * FROM TEST.T"), table() //
-                .row(Matchers.anything()) //
-                .matches());
+        try (final ResultSet resultSet = query("SELECT * FROM TEST.T")) {
+            assertDoesNotThrow(() -> table().row(Matchers.anything()).matches().matches(resultSet));
+        }
     }
 }

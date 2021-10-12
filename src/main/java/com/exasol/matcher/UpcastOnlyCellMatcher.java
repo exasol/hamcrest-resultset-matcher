@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
 
 /**
  * This matcher checks, that the actual cell has a type that can be safely up-cast to the expected type.
@@ -16,8 +16,10 @@ import org.hamcrest.TypeSafeMatcher;
  * This matcher does <b>not</b> check the value of the cell. Use a second matcher for that (for example the
  * {@link FuzzyCellMatcher}).
  * </p>
+ *
+ * @param <T> matcher type
  */
-public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
+public class UpcastOnlyCellMatcher<T> extends BaseMatcher<T> {
     private static final List<Class<?>> DECIMAL_TYPES = List.of(Byte.class, Short.class, Integer.class, Long.class,
             BigInteger.class, BigDecimal.class);
     private static final List<Class<?>> FLOATING_POINT_TYPES = List.of(Float.class, Double.class);
@@ -26,9 +28,11 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     private Mismatch lastMismatch;
 
     @Override
-    protected boolean matchesSafely(final T actual) {
+    public boolean matches(final Object actual) {
         this.lastMismatch = null;
-        if (actual instanceof Number && this.expected instanceof Number) {
+        if (actual == null) {
+            return this.expected == null;
+        } else if ((actual instanceof Number) && (this.expected instanceof Number)) {
             return checkNumbersAreOnlyUpcasted(actual, this.expected);
         } else {
             return actual.getClass().equals(this.expected.getClass());
@@ -51,19 +55,20 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
     }
 
     @Override
-    protected void describeMismatchSafely(final T item, final Description mismatchDescription) {
+    public void describeMismatch(final Object object, final Description mismatchDescription) {
         switch (this.lastMismatch) {
         case FLOAT_DECIMAL_MISMATCH:
             mismatchDescription
                     .appendText("Can not cast from actual floating point to expected non-floating point type.");
             break;
         case ACTUAL_BIGGER_THAN_EXPECTED:
-            mismatchDescription.appendText(
-                    "The actual type is bigger than the expected. You can disable this check by using the NO_JAVA_TYPE_CHECK fuzzy-mode.");
+            mismatchDescription.appendText("The actual type is bigger than the expected."
+                    + " You can disable this check by using the NO_JAVA_TYPE_CHECK fuzzy-mode.");
             break;
         case DECIMAL_BIGGER_THAN_FLOATING_POINT:
-            mismatchDescription.appendText(
-                    "Illegal upcast. Upcasts are only allowed from non floating types <= short to float and from types <= integer to double.");
+            mismatchDescription
+                    .appendText("Illegal upcast. Upcasts are only allowed from non floating types <= short to float"
+                            + " and from types <= integer to double.");
             break;
         default:
             break;
@@ -72,7 +77,11 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
 
     @Override
     public void describeTo(final Description description) {
-        description.appendText("type that can safely be cast to ").appendText(this.expected.getClass().getName());
+        if (this.expected == null) {
+            description.appendText("null value (type casting ignored)");
+        } else {
+            description.appendText("type that can safely be cast to ").appendText(this.expected.getClass().getName());
+        }
     }
 
     private boolean checkNumbersAreOnlyUpcasted(final Object actual, final Object expected) {
@@ -93,7 +102,7 @@ public class UpcastOnlyCellMatcher<T> extends TypeSafeMatcher<T> {
         final int actualIndex = DECIMAL_TYPES.indexOf(actual.getClass());
         if (actualIndex <= DECIMAL_TYPES.indexOf(Short.class)) {
             return true; // we can safely cast a SHORT to a float or double
-        } else if (actualIndex <= DECIMAL_TYPES.indexOf(Integer.class)
+        } else if ((actualIndex <= DECIMAL_TYPES.indexOf(Integer.class))
                 && this.expected.getClass().equals(Double.class)) {
             return true; // we can safely cast an Integer to a double
         } else {

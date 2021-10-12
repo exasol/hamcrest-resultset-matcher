@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -71,15 +72,15 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     @Override
     public boolean matches(final Object actual) {
         this.lastDifference = null;
-        if ((actual instanceof Number && this.expected instanceof Number)
-                || (actual instanceof Number && this.expected instanceof String)
-                || (actual instanceof String && this.expected instanceof Number)) {
+        if (((actual instanceof Number) && (this.expected instanceof Number))
+                || ((actual instanceof Number) && (this.expected instanceof String))
+                || ((actual instanceof String) && (this.expected instanceof Number))) {
             try {
                 return compareAsNumbers(actual);
             } catch (final NumberFormatException exception) {
                 return defaultCompare(actual);
             }
-        } else if (actual instanceof java.sql.Date && this.expected instanceof java.util.Date) {
+        } else if ((actual instanceof java.sql.Date) && (this.expected instanceof java.util.Date)) {
             final Instant actualDate = Instant.ofEpochMilli(((java.sql.Date) actual).getTime())
                     .truncatedTo(ChronoUnit.DAYS);
             final Instant expectedDate = Instant.ofEpochMilli(((java.util.Date) this.expected).getTime())
@@ -91,7 +92,8 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     }
 
     private boolean defaultCompare(final Object actual) {
-        return actual.equals(this.expected);
+        // We use Objects.equals here to account for cases where the actual value is null.
+        return Objects.equals(actual, this.expected);
     }
 
     private boolean compareAsNumbers(final Object actual) {
@@ -127,7 +129,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
      * values are not. That can be confusing for testing. For that reason, we decided to print the values in UTC here.
      * Testers can notice that by the {@code Z} at the end of the timestamp.
      * </p>
-     * 
+     *
      * @param actual object to improve.
      * @return object or string
      */
@@ -151,7 +153,7 @@ public class FuzzyCellMatcher<T> extends BaseMatcher<T> {
     public void describeMismatch(final Object item, final Description description) {
         description.appendText(" was ") //
                 .appendValue(improveToStringOfTimestampAndDate(item));
-        if (isMatchingWithToleranceEnabled() && this.lastDifference != null) {
+        if (isMatchingWithToleranceEnabled() && (this.lastDifference != null)) {
             description.appendText(" difference was ").appendValue(this.lastDifference);
         }
     }
