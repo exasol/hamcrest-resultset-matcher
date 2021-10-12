@@ -37,7 +37,6 @@ public class UpcastOnlyCellMatcher<T> extends BaseMatcher<T> {
         } else {
             return actual.getClass().equals(this.expected.getClass());
         }
-
     }
 
     private UpcastOnlyCellMatcher(final T expected) {
