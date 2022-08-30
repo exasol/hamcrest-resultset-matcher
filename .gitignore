@@ -14,3 +14,19 @@ target
 *.iml
 # Default ignored files
 /workspace.xml
+.DS_Store
+*.swp
+local
+.dbeaver*
+**/*.log
+.directory
+venv/
+dependency-reduced-pom.xml
+pom.xml.versionsBackup
+~*
+*.lock
+*.bak
+*.orig
+*.old
+*.md.html
+*.flattened-pom.xml
