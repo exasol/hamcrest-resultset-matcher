@@ -267,6 +267,11 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private BigDecimal tolerance = BigDecimal.ZERO;
         private Calendar calendar;
 
+        /**
+         * Add a column to the the structure to be matched.
+         * 
+         * @param expectedColumn the expected column
+         */
         public void addExpectedColumn(final Column expectedColumn) {
             this.expectedColumns.add(expectedColumn);
         }

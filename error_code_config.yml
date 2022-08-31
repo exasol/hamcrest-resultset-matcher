@@ -2,3 +2,4 @@ error-tags:
   HRM:
     packages:
       - com.exasol.matcher
+    highest-index: 1
