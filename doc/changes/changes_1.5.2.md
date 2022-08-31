@@ -1,4 +1,4 @@
-# Matcher for SQL Result Sets 1.5.2, released 2022-08-30
+# Matcher for SQL Result Sets 1.5.2, released 2022-08-31
 
 Code name: Fix broken link checker
 
