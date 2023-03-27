@@ -213,7 +213,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         LOGGER.warning(() -> ExaError.messageBuilder("W-HRM-1").message(
                 "Reading a timestamp or date value without configured calendar. That's dangerous since the JDBC driver is using the time-zone of the test system in that case.")
                 .mitigation(
-                        "You can fix this by providing a calendar using 'withCalendar(Calendar)'. For example 'Calendar.getInstance(TimeZone.getTimeZone(\"UTC\")'.")
+                        "You can fix this by providing a calendar using 'withCalendar(Calendar)'. For example 'Calendar.getInstance(TimeZone.getTimeZone(\"UTC\"))'.")
                 .toString());
         this.isCalendarWarningDisplayed = true;
     }

@@ -1,7 +1,7 @@
 # Hamcrest Result Set Matcher.
 
 [![Build Status](https://github.com/exasol/hamcrest-resultset-matcher/actions/workflows/ci-build.yml/badge.svg)](https://github.com/exasol/hamcrest-resultset-matcher/actions/workflows/ci-build.yml)
-[![Maven Central – Matcher for SQL Result Sets](https://img.shields.io/maven-central/v/com.exasol/hamcrest-resultset-matcher)](https://search.maven.org/artifact/com.exasol/hamcrest-resultset-matcher)
+[![Maven Central &ndash; Matcher for SQL Result Sets](https://img.shields.io/maven-central/v/com.exasol/hamcrest-resultset-matcher)](https://search.maven.org/artifact/com.exasol/hamcrest-resultset-matcher)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exasol%3Ahamcrest-resultset-matcher&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exasol%3Ahamcrest-resultset-matcher)
 
