@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.exasol</groupId>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.3</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher/</url>
     <properties>
-        <junit.version>5.9.0</junit.version>
+        <junit.version>5.9.2</junit.version>
     </properties>
     <distributionManagement>
         <snapshotRepository>
@@ -20,22 +20,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-    <repositories>
-        <repository>
-            <id>maven.exasol.com</id>
-            <url>https://maven.exasol.com/artifactory/exasol-releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>maven.exasol.com-snapshots</id>
-            <url>https://maven.exasol.com/artifactory/exasol-snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -63,24 +47,24 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>6.2.0</version>
+            <version>6.5.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.17.3</version>
+            <version>1.17.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>error-reporting-java</artifactId>
-            <version>0.4.1</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.17.3</version>
+            <version>1.17.6</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -89,7 +73,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.6.2</version>
+                <version>2.9.6</version>
                 <executions>
                     <execution>
                         <goals>
@@ -103,7 +87,7 @@
     <parent>
         <artifactId>hamcrest-resultset-matcher-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>1.5.2</version>
+        <version>1.5.3</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
