@@ -1,4 +1,4 @@
-# Matcher for SQL Result Sets 1.6.0, released 2023-04-??
+# Matcher for SQL Result Sets 1.6.0, released 2023-04-17
 
 Code name: Match in any order
 
@@ -6,7 +6,12 @@ Code name: Match in any order
 
 In this release we added the ability to match rows in any order.
 
-Note that this requires retrieving all columns before matching, so it will be slower and use more memory for large result sets than a simple match.
+This is very useful in case you have unordered results that you need to validate. It also makes sure that you are not forced to introduce artificial ordering in your production code where not required just to enable testing.
+
+There are downsides to unordered matching too, that you should be aware of:
+
+1. The algorithm uses quadratic time, also known as O(n²), so running it against large result sets comes with worse performance than the ordered counterpart. That being said, this library is intended for functional testing, and you will usually not have use cases where you formulate large expected result sets in your integration tests.
+2. The diagnostic messages are less precise, since matching in any order introduces a lot of fuzziness. For example when the row count differs between expectation and actual result, additionally specifying the first mismatch makes no sense. In an ordered match it does.
 
 ## Features
 

@@ -32,6 +32,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private final BigDecimal tolerance;
     private final Description cellDescription = new StringDescription();
     private final Description cellMismatchDescription = new StringDescription();
+    private boolean ambiguousRowMatch;
 
     private ResultSetStructureMatcher(final Builder builder) {
         this.expectedColumns = builder.expectedColumns;
@@ -104,15 +105,24 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             mismatchDescription //
                     .appendList(" (", ", ", ")", this.actualColumns);
         }
-        if (this.contentDeviates) {
-            mismatchDescription.appendText(" where content deviates starting row ") //
-                    .appendValue(this.deviationStartRow) //
-                    .appendText(", column ") //
-                    .appendValue(this.deviationStartColumn) //
-                    .appendText(": expected was ") //
-                    .appendText(this.cellDescription.toString())//
-                    .appendText(" but ")//
-                    .appendText(this.cellMismatchDescription.toString());
+        if(this.ambiguousRowMatch) {
+            mismatchDescription.appendText(" where at least one expected row matched multiple result rows. "
+                    + "Please narrow down the matching criteria to avoid ambiguity.");
+        } else if (this.contentDeviates) {
+            if(this.requireSameOrder) {
+                mismatchDescription.appendText(" where content deviates starting row ") //
+                        .appendValue(this.deviationStartRow) //
+                        .appendText(", column ") //
+                        .appendValue(this.deviationStartColumn) //
+                        .appendText(": expected was ") //
+                        .appendText(this.cellDescription.toString())//
+                        .appendText(" but ")//
+                        .appendText(this.cellMismatchDescription.toString());
+            } else {
+                mismatchDescription.appendText(" where row ") //
+                        .appendValue(this.deviationStartRow) //
+                        .appendText(" was the first that did not match any expected row");
+            }
         }
     }
 
@@ -130,7 +140,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
                 if (resultSet.next()) {
                     ++rowIndex;
-                    ok = ok && matchValuesInRowMatch(resultSet, rowIndex, cellMatcherRow);
+                    ok = ok && matchValuesInRow(resultSet, rowIndex, cellMatcherRow, true);
                 } else {
                     ok = false;
                 }
@@ -156,28 +166,45 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 ++rowIndex;
                 boolean anyMatchForThisResultRow = false;
                 int matcherIndex = 0;
-                for(final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable)
-                {
-                    if(matchValuesInRowMatch(resultSet, rowIndex, cellMatcherRow)) {
+                for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
+                    if (matchValuesInRow(resultSet, rowIndex, cellMatcherRow, false)) {
                         ++matchesForRowMatcher[matcherIndex];
                         anyMatchForThisResultRow = true;
                     }
                     ++matcherIndex;
                 }
+                recordRowMatchResult(rowIndex, anyMatchForThisResultRow);
                 ok = ok && anyMatchForThisResultRow;
             }
             this.actualRowCount = rowIndex;
-            for(int matcherIndex = 0; matcherIndex < numberOfRowMatchers; ++matcherIndex)
-            {
-                if(matchesForRowMatcher[matcherIndex] != 1) {
-                    ok = false;
-                    break;
-                }
+            if (validateAllMatchersMatchedExactlyOnce(numberOfRowMatchers, matchesForRowMatcher)) {
+                return ok;
+            } else {
+                return false;
             }
-            return ok;
         } catch (final SQLException exception) {
             throw new AssertionError("Unable to check result set: " + exception.getMessage());
         }
+    }
+
+    private void recordRowMatchResult(final int rowIndex, final boolean anyMatchForThisResultRow) {
+        if (!anyMatchForThisResultRow && !this.contentDeviates)
+        {
+            this.contentDeviates = true;
+            this.deviationStartRow = rowIndex;
+        }
+    }
+
+    private boolean validateAllMatchersMatchedExactlyOnce(final int numberOfRowMatchers, final int[] matchesForRowMatcher) {
+        for (int matcherIndex = 0; matcherIndex < numberOfRowMatchers; ++matcherIndex) {
+            if (matchesForRowMatcher[matcherIndex] == 0) {
+                return false;
+            } else if (matchesForRowMatcher[matcherIndex] > 1) {
+                this.ambiguousRowMatch = true;
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean matchColumns(final ResultSet resultSet) {
@@ -206,14 +233,31 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         return this.expectedColumns.size();
     }
 
-    private boolean matchValuesInRowMatch(final ResultSet resultSet, final int rowIndex,
-            final List<Matcher<?>> cellMatcherRow) {
+    /**
+     * Match the values in a result row.
+     * <p>
+     * You can optionally record the first mismatch. This is useful in case you have exactly one attempt to match a row.
+     * If you try against multiple matchers (e.g. when matching rows in any order), the first mismatch might be OK, so
+     * recording it at this early stage is not useful.
+     * </p>
+     *
+     * @param resultSet result set from which to read the cell values
+     * @param rowIndex index of the row in the result set
+     * @param cellMatcherRow list of matchers that are tested against the row's cells
+     * @param recordFirstDeviation record the first mismatch when set to {@code true}
+     * @return {@code true} if the given matchers match all cells in this row
+     */
+    private boolean matchValuesInRow(final ResultSet resultSet, final int rowIndex,
+            final List<Matcher<?>> cellMatcherRow, final boolean recordFirstDeviation) {
         int columnIndex = 0;
         try {
             for (final Matcher<?> cellMatcher : cellMatcherRow) {
                 ++columnIndex;
                 final Object value = readCellValue(resultSet, columnIndex);
-                if (!matchCell(value, cellMatcher, rowIndex, columnIndex)) {
+                if (!cellMatcher.matches(value)) {
+                    if (recordFirstDeviation) {
+                        recordFirstDeviation(value, cellMatcher, rowIndex, columnIndex);
+                    }
                     return false;
                 }
             }
@@ -260,18 +304,12 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         this.isCalendarWarningDisplayed = true;
     }
 
-    private boolean matchCell(final Object value, final Matcher<?> cellMatcher, final int rowIndex,
-            final int columnIndex) {
-        if (cellMatcher.matches(value)) {
-            return true;
-        } else {
-            this.contentDeviates = true;
-            this.deviationStartRow = rowIndex;
-            this.deviationStartColumn = columnIndex;
-            cellMatcher.describeTo(this.cellDescription);
-            cellMatcher.describeMismatch(value, this.cellMismatchDescription);
-            return false;
-        }
+    private void recordFirstDeviation(final Object value, final Matcher<?> cellMatcher, final int rowIndex, final int columnIndex) {
+        this.contentDeviates = true;
+        this.deviationStartRow = rowIndex;
+        this.deviationStartColumn = columnIndex;
+        cellMatcher.describeTo(this.cellDescription);
+        cellMatcher.describeMismatch(value, this.cellMismatchDescription);
     }
 
     /**
