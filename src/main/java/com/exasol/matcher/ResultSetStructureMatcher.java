@@ -445,17 +445,17 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         /**
          * Create a matcher that ignores the order of the result rows with strict cell type checking.
          * 
-         * @return matcher
+         * @return matcher the new matcher
          */
         public Matcher<ResultSet> matchesInAnyOrder() {
             return matchesInAnyOrder(TypeMatchMode.STRICT);
         }
 
         /**
-         * Create a matcher that ignores the order of the result rows with a given type match mode
+         * Create a matcher that ignores the order of the result rows with a given type match mode.
          * 
          * @param typeMatchMode mode for type matching
-         * @return matcher
+         * @return matcher the new matcher
          */
         private Matcher<ResultSet> matchesInAnyOrder(final TypeMatchMode typeMatchMode) {
             this.requireSameOrder = false;
