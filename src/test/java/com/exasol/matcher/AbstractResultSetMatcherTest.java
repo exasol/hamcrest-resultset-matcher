@@ -10,16 +10,16 @@ public abstract class AbstractResultSetMatcherTest {
     protected void execute(final String sql) {
         try {
             this.statement.execute(sql);
-        } catch (final SQLException execption) {
-            throw new AssertionError("Unable to execute SQL statement: " + sql, execption);
+        } catch (final SQLException exception) {
+            throw new AssertionError("Unable to execute SQL statement: " + sql, exception);
         }
     }
 
     protected ResultSet query(final String sql) {
         try {
             return this.statement.executeQuery(sql);
-        } catch (final SQLException exeption) {
-            throw new AssertionError("Unable to run query: " + sql, exeption);
+        } catch (final SQLException exception) {
+            throw new AssertionError("Unable to run query: " + sql, exception);
         }
     }
 }

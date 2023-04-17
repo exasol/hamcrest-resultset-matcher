@@ -3,7 +3,7 @@ package com.exasol.matcher;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
@@ -169,5 +169,15 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
                 .row(CellMatcherFactory.cellMatcher(1.35, TypeMatchMode.STRICT, EPS)) //
                 .row(CellMatcherFactory.cellMatcher(2.567997, TypeMatchMode.STRICT, EPS)) //
                 .matches());
+    }
+
+    @Test
+    void testMatchInAnyOrder() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER VALUES ('first', 1), ('second', 2), ('third', 3)");
+        assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER"), table() //
+                .row("second", 2) //
+                .row("third", 3)
+                .row("first", 1).matchesInAnyOrder());
     }
 }

@@ -28,6 +28,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private int deviationStartRow;
     private final List<Column> actualColumns = new ArrayList<>();
     private final TypeMatchMode typeMatchMode;
+    private final boolean requireSameOrder;
     private final BigDecimal tolerance;
     private final Description cellDescription = new StringDescription();
     private final Description cellMismatchDescription = new StringDescription();
@@ -35,6 +36,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private ResultSetStructureMatcher(final Builder builder) {
         this.expectedColumns = builder.expectedColumns;
         this.typeMatchMode = builder.typeMatchMode;
+        this.requireSameOrder = builder.requireSameOrder;
         this.tolerance = builder.tolerance;
         this.calendar = builder.calendar;
         this.contentDeviates = false;
@@ -45,7 +47,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     private List<List<Matcher<?>>> wrapExpectedValuesInMatchers(final Builder builder) {
         final List<List<Matcher<?>>> tableOfMatchers = new ArrayList<>(builder.rows);
         for (final List<Object> expectedRow : builder.expectedTable) {
-            final List<Matcher<?>> cellMatchers = wrapExpecteRowInMatchers(expectedRow);
+            final List<Matcher<?>> cellMatchers = wrapExpectedRowInMatchers(expectedRow);
             tableOfMatchers.add(cellMatchers);
         }
         return tableOfMatchers;
@@ -55,7 +57,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         return (Matcher<?>) expectedCellValue;
     }
 
-    private List<Matcher<?>> wrapExpecteRowInMatchers(final List<Object> expectedRow) {
+    private List<Matcher<?>> wrapExpectedRowInMatchers(final List<Object> expectedRow) {
         final List<Matcher<?>> rowOfMatchers = new ArrayList<>(expectedRow.size());
         for (final Object expectedCellValue : expectedRow) {
             if (expectedCellValue instanceof Matcher<?>) {
@@ -116,7 +118,13 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
 
     @Override
     protected boolean matchesSafely(final ResultSet resultSet) {
-        boolean ok = matchColumns(resultSet);
+        boolean columnsOk = matchColumns(resultSet);
+        boolean rowsOk = this.requireSameOrder ? matchRowsInOrder(resultSet) : matchRowsInAnyOrder(resultSet);
+        return columnsOk && rowsOk;
+    }
+
+    private boolean matchRowsInOrder(final ResultSet resultSet) {
+        boolean ok = true;
         try {
             int rowIndex = 0;
             for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
@@ -132,6 +140,40 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 ++rowIndex;
             }
             this.actualRowCount = rowIndex;
+            return ok;
+        } catch (final SQLException exception) {
+            throw new AssertionError("Unable to check result set: " + exception.getMessage());
+        }
+    }
+
+    private boolean matchRowsInAnyOrder(final ResultSet resultSet) {
+        boolean ok = true;
+        try {
+            final int numberOfRowMatchers = this.cellMatcherTable.size();
+            int[] matchesForRowMatcher = new int[numberOfRowMatchers];
+            int rowIndex = 0;
+            while (resultSet.next()) {
+                ++rowIndex;
+                boolean anyMatchForThisResultRow = false;
+                int matcherIndex = 0;
+                for(final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable)
+                {
+                    if(matchValuesInRowMatch(resultSet, rowIndex, cellMatcherRow)) {
+                        ++matchesForRowMatcher[matcherIndex];
+                        anyMatchForThisResultRow = true;
+                    }
+                    ++matcherIndex;
+                }
+                ok = ok && anyMatchForThisResultRow;
+            }
+            this.actualRowCount = rowIndex;
+            for(int matcherIndex = 0; matcherIndex < numberOfRowMatchers; ++matcherIndex)
+            {
+                if(matchesForRowMatcher[matcherIndex] != 1) {
+                    ok = false;
+                    break;
+                }
+            }
             return ok;
         } catch (final SQLException exception) {
             throw new AssertionError("Unable to check result set: " + exception.getMessage());
@@ -266,9 +308,10 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private TypeMatchMode typeMatchMode;
         private BigDecimal tolerance = BigDecimal.ZERO;
         private Calendar calendar;
+        private boolean requireSameOrder = true;
 
         /**
-         * Add a column to the the structure to be matched.
+         * Add a column to the structure to be matched.
          * 
          * @param expectedColumn the expected column
          */
@@ -347,17 +390,37 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          * @return matcher
          */
         public Matcher<ResultSet> matches() {
-            this.typeMatchMode = TypeMatchMode.STRICT;
-            return new ResultSetStructureMatcher(this);
+            return matches(TypeMatchMode.STRICT);
         }
 
         /**
-         * Create a new matcher that matches cell types strictly.
+         * Create a new matcher that matches cell types depending on type match mode.
          * 
          * @param typeMatchMode mode for type matching
          * @return matcher
          */
         public Matcher<ResultSet> matches(final TypeMatchMode typeMatchMode) {
+            this.typeMatchMode = typeMatchMode;
+            return new ResultSetStructureMatcher(this);
+        }
+
+        /**
+         * Create a matcher that ignores the order of the result rows with strict cell type checking.
+         * 
+         * @return matcher
+         */
+        public Matcher<ResultSet> matchesInAnyOrder() {
+            return matchesInAnyOrder(TypeMatchMode.STRICT);
+        }
+
+        /**
+         * Create a matcher that ignores the order of the result rows with a given type match mode
+         * 
+         * @param typeMatchMode mode for type matching
+         * @return matcher
+         */
+        private Matcher<ResultSet> matchesInAnyOrder(final TypeMatchMode typeMatchMode) {
+            this.requireSameOrder = false;
             this.typeMatchMode = typeMatchMode;
             return new ResultSetStructureMatcher(this);
         }
