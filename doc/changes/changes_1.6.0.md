@@ -22,7 +22,6 @@ There are downsides to unordered matching too, that you should be aware of:
 ### Test Dependency Updates
 
 * Updated `com.exasol:exasol-testcontainers:6.5.1` to `6.5.2`
-* Updated `org.apache.derby:derby:10.15.2.0` to `10.16.1.1`
 * Updated `org.testcontainers:jdbc:1.17.6` to `1.18.0`
 * Updated `org.testcontainers:junit-jupiter:1.17.6` to `1.18.0`
 
