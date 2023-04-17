@@ -119,11 +119,31 @@ class CustomerTablePopulationTest {
 As you can see, the test validates that the result set contains two rows and those rows contents. It does however not care about the column type of the result set. If you want to make the test more strict in that respect, you can add type names to the factory method `table(...)`.
 
 ```java
-assertThat(result,table("INTEGER","VARCHAR","VARCHAR")
+assertThat(result, table("INTEGER","VARCHAR","VARCHAR")
         .row(1,"JOHN","DOE")
         .row(2,"JANE","SMITH")
         .matches());
 ```
+
+### Ignoring the Order of the Result Rows
+
+Often queries in an application produce unordered results. In those cases software developers should not be forced to introduce artificial ordering in their production code just to make testing easier.
+
+Starting with version 1.6.0 the HRM supports matching result set columns in any order:
+
+```java
+assertThat(result, table()
+        .row("Toe")
+        .row("Tac")
+        .row("Tic")
+        .matchesInAnyOrder())
+```
+
+This defines that **each expected row must be matched exactly once**, but the order does not factor into the validation result.
+
+Note however that the assertion does not only complain if a row is not matched, but also in case there are multiple matches in the results for the same expected row. This is a precaution preventing subtle duplication bugs slipping through the net of your test. In practice this means that you might have to tighten down the matching criteria in your test if HRM detects ambiguous matches. This is especially important if you use [nested matchers](#nesting-matchers).
+
+Performance-wise matching in any order is worse than ordered matching, because we need to test every row against every expectation resulting in quadratic time. So it is not particularly well suited for checking large result sets. On the other hand, the whole point of the HRM is functional testing, and you will seldom be tempted to formulate large expected result sets. After all this kind of code would be hard to maintain and fragile. 
 
 ### Type Checks / Fuzzy Matching
 

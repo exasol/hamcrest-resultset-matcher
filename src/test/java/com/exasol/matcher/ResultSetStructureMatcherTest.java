@@ -3,7 +3,7 @@ package com.exasol.matcher;
 import static com.exasol.matcher.ResultSetStructureMatcher.table;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 
+// Derby does not support SELECT FROM VALUES, so we have to create actual tables and insert values into them in the
+// test preparation. Don't try to rewrite this with SELECT FROM VALUES.
+
 class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
@@ -23,7 +26,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     }
 
     @Test
-    void testMatchSimpleResultset() {
+    void testMatchSimpleResultSet() {
         execute("CREATE TABLE SIMPLE(COL1 VARCHAR(20), COL2 INTEGER)");
         execute("INSERT INTO SIMPLE VALUES ('foo', 1), ('bar', 2)");
         assertThat(query("SELECT * FROM SIMPLE"), table().row("foo", 1).row("bar", 2).matches());
@@ -169,5 +172,80 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
                 .row(CellMatcherFactory.cellMatcher(1.35, TypeMatchMode.STRICT, EPS)) //
                 .row(CellMatcherFactory.cellMatcher(2.567997, TypeMatchMode.STRICT, EPS)) //
                 .matches());
+    }
+
+    @Test
+    void testMatchInAnyOrder() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER VALUES ('first', 1), ('second', 2), ('third', 3)");
+        assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER"), table() //
+                .row("second", 2) //
+                .row("third", 3)
+                .row("first", 1).matchesInAnyOrder());
+    }
+
+    @Test
+    void testMatchInAnyOrderWithNestedMatcher() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_NESTED(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_NESTED VALUES ('first', 1), ('second', 2), ('third', 3)");
+        assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER_NESTED"), table() //
+                .row(containsString("con"), 2) //
+                .row("third", greaterThan(2))
+                .row("first", 1).matchesInAnyOrder());
+    }
+
+    @Test
+    void testMatchInAnyOrderFailsBecauseTooManyRows() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_TOO_MANY_ROWS(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_TOO_MANY_ROWS VALUES ('first', 1), ('second', 2), ('third', 3)");
+        assertQueryResultNotMatched("SELECT * FROM IN_ANY_ORDER_MATCHER_TOO_MANY_ROWS", //
+                table().row("second", 2).row("third", 3).matchesInAnyOrder(),
+                "ResultSet with <2> rows and <2> columns", //
+                "ResultSet with <3> rows and <2> columns"
+                        + " where row <1> was the first that did not match any expected row");
+    }
+
+    @Test
+    void testMatchInAnyOrderFailsBecauseTooFewRows() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_TOO_FEW_ROWS(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_TOO_FEW_ROWS VALUES ('first', 1), ('second', 2)");
+        assertQueryResultNotMatched("SELECT * FROM IN_ANY_ORDER_MATCHER_TOO_FEW_ROWS", //
+                table().row("second", 2).row("third", 3).row("first", 1).matchesInAnyOrder(),
+                "ResultSet with <3> rows and <2> columns", //
+                "ResultSet with <2> rows and <2> columns");
+    }
+
+    @Test
+    void testMatchInAnyOrderFailsBecauseOfUnmatchedRow() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_UNMATCHED_ROW(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_UNMATCHED_ROW VALUES ('Moe', 1), ('Larry', 2), ('Curly', 3)");
+        assertQueryResultNotMatched("SELECT * FROM IN_ANY_ORDER_MATCHER_UNMATCHED_ROW", //
+                table().row("Larry", 2).row("Curly", 777).row("Moe", 1).matchesInAnyOrder(),
+                "ResultSet with <3> rows and <2> columns", //
+                "ResultSet with <3> rows and <2> columns"
+                        + " where row <3> was the first that did not match any expected row");
+    }
+
+
+    @Test
+    void testMatchInAnyOrderFailsBecauseOfAmbiguousMatch() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_AMBIGUOUS(COL1 VARCHAR(10))");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_AMBIGUOUS VALUES ('Tic'), ('Tac'), ('Toe')");
+        assertQueryResultNotMatched("SELECT * FROM IN_ANY_ORDER_MATCHER_AMBIGUOUS", //
+                table().row("Toe").row("Tac").row(matchesPattern("T.c")).matchesInAnyOrder(),
+                "ResultSet with <3> rows and <1> columns", //
+                "ResultSet with <3> rows and <1> columns"
+                        + " where at least one expected row matched multiple result rows."
+                        + " Please narrow down the matching criteria to avoid ambiguity.");
+    }
+
+    @Test
+    void testMatchInAnyOrderFailsBecauseOfTypeMismatch() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_TYPE_MISMATCH(COL1 VARCHAR(10))");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_TYPE_MISMATCH VALUES ('Tic'), ('Tac'), ('Toe')");
+        assertQueryResultNotMatched("SELECT * FROM IN_ANY_ORDER_MATCHER_TYPE_MISMATCH", //
+                table("CHAR(10)").row("Toe").row("Tac").row(matchesPattern("Tic")).matchesInAnyOrder(),
+                "ResultSet with <3> rows and <1> columns (CHAR(10))", //
+                "ResultSet with <3> rows and <1> columns (VARCHAR)");
     }
 }
