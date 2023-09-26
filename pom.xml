@@ -2,23 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher/</url>
     <properties>
-        <junit.version>5.9.2</junit.version>
+        <junit.version>5.10.0</junit.version>
     </properties>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -46,13 +36,13 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>6.5.2</version>
+            <version>6.6.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.18.0</version>
+            <version>1.19.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -63,7 +53,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.18.0</version>
+            <version>1.19.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -72,7 +62,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.9.7</version>
+                <version>2.9.12</version>
                 <executions>
                     <execution>
                         <goals>
@@ -86,7 +76,7 @@
     <parent>
         <artifactId>hamcrest-resultset-matcher-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>1.6.0</version>
+        <version>1.6.1</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
