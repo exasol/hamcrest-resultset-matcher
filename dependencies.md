@@ -32,7 +32,7 @@
 | [Versions Maven Plugin][20]                             | [Apache License, Version 2.0][15]             |
 | [duplicate-finder-maven-plugin Maven Mojo][21]          | [Apache License 2.0][22]                      |
 | [Apache Maven Deploy Plugin][23]                        | [Apache-2.0][15]                              |
-| [Apache Maven GPG Plugin][24]                           | [Apache License, Version 2.0][15]             |
+| [Apache Maven GPG Plugin][24]                           | [Apache-2.0][15]                              |
 | [Apache Maven Source Plugin][25]                        | [Apache License, Version 2.0][15]             |
 | [Apache Maven Javadoc Plugin][26]                       | [Apache-2.0][15]                              |
 | [Nexus Staging Maven Plugin][27]                        | [Eclipse Public License][28]                  |
@@ -57,7 +57,7 @@
 [7]: http://www.apache.org/licenses/LICENSE-2.0.txt
 [8]: https://github.com/exasol/exasol-testcontainers/
 [9]: https://github.com/exasol/exasol-testcontainers/blob/main/LICENSE
-[10]: https://testcontainers.org
+[10]: https://java.testcontainers.org
 [11]: http://opensource.org/licenses/MIT
 [12]: http://sonarsource.github.io/sonar-scanner-maven/
 [13]: http://www.gnu.org/licenses/lgpl.txt
@@ -68,7 +68,7 @@
 [18]: https://sonatype.github.io/ossindex-maven/maven-plugin/
 [19]: https://maven.apache.org/surefire/maven-surefire-plugin/
 [20]: https://www.mojohaus.org/versions/versions-maven-plugin/
-[21]: https://github.com/basepom/duplicate-finder-maven-plugin
+[21]: https://basepom.github.io/duplicate-finder-maven-plugin
 [22]: http://www.apache.org/licenses/LICENSE-2.0.html
 [23]: https://maven.apache.org/plugins/maven-deploy-plugin/
 [24]: https://maven.apache.org/plugins/maven-gpg-plugin/
