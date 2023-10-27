@@ -39,7 +39,7 @@ class RowMatcherIT extends AbstractResultSetMatcherTest {
                 .row(1, "a", 1) //
                 .row(greaterThan(0), "b", 3) //
                 .matchesInAnyOrder();
-        AssertionError error = assertThrows(AssertionError.class,
+        final AssertionError error = assertThrows(AssertionError.class,
                 () -> anyOrderMatcher.matches(query("SELECT * FROM T")));
         assertThat(error.getMessage(), startsWith("Row expectation definition 1 tries to validate the value of row 1, "
                 + "column 3 but that value can't be read from the result set. "
@@ -56,7 +56,7 @@ class RowMatcherIT extends AbstractResultSetMatcherTest {
                 .row(1, "A", 1) //
                 .row(greaterThan(0), "B", 3) //
                 .matches();
-        AssertionError error = assertThrows(AssertionError.class,
+        final AssertionError error = assertThrows(AssertionError.class,
                 () -> orderedMatcher.matches(query("SELECT * FROM T")));
         assertThat(error.getMessage(), startsWith("Row expectation definition 1 tries to validate the value of row 1, "
                 + "column 3 but that value can't be read from the result set. "
