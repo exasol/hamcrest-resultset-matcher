@@ -31,7 +31,8 @@ class RowMatcherIT extends AbstractResultSetMatcherTest {
 
     // This is a regression test for https://github.com/exasol/hamcrest-resultset-matcher/issues/44
     @Test
-    void testMatchingInAnyOrderAndExpectingThreeColumnsThrowsAssertionErrorWhenResultSetHasOnlyTwoColumns() {
+    void testMatchingInAnyOrderAndExpectingThreeColumnsThrowsAssertionErrorWhenResultSetHasOnlyTwoColumns()
+            throws SQLException {
         execute("CREATE TABLE T(I INTEGER, V VARCHAR(20))");
         execute("INSERT INTO T VALUES (1, 'a'), (2, 'b')");
         final Matcher<ResultSet> anyOrderMatcher = ResultSetStructureMatcher //
@@ -39,16 +40,19 @@ class RowMatcherIT extends AbstractResultSetMatcherTest {
                 .row(1, "a", 1) //
                 .row(greaterThan(0), "b", 3) //
                 .matchesInAnyOrder();
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> anyOrderMatcher.matches(query("SELECT * FROM T")));
-        assertThat(error.getMessage(), startsWith("Row expectation definition 1 tries to validate the value of row 1, "
-                + "column 3 but that value can't be read from the result set. "
-                + "This usually means the column does not exist. \nCaused by SQL error:"));
+        try(final ResultSet result = query("SELECT * FROM T")) {
+            final AssertionError error = assertThrows(AssertionError.class,
+                    () -> anyOrderMatcher.matches(result));
+            assertThat(error.getMessage(), startsWith("Row expectation definition 1 tries to validate the value of row 1, "
+                    + "column 3 but that value can't be read from the result set. "
+                    + "This usually means the column does not exist. \nCaused by SQL error:"));
+        }
     }
 
     // This is a regression test for https://github.com/exasol/hamcrest-resultset-matcher/issues/44
     @Test
-    void testMatchingInStrictOrderAndExpectingThreeColumnsThrowsAssertionErrorWhenResultSetHasOnlyTwoColumns() {
+    void testMatchingInStrictOrderAndExpectingThreeColumnsThrowsAssertionErrorWhenResultSetHasOnlyTwoColumns()
+            throws SQLException {
         execute("CREATE TABLE T(I INTEGER, V VARCHAR(20))");
         execute("INSERT INTO T VALUES (1, 'A'), (2, 'B')");
         final Matcher<ResultSet> orderedMatcher = ResultSetStructureMatcher //
@@ -56,10 +60,12 @@ class RowMatcherIT extends AbstractResultSetMatcherTest {
                 .row(1, "A", 1) //
                 .row(greaterThan(0), "B", 3) //
                 .matches();
-        final AssertionError error = assertThrows(AssertionError.class,
-                () -> orderedMatcher.matches(query("SELECT * FROM T")));
-        assertThat(error.getMessage(), startsWith("Row expectation definition 1 tries to validate the value of row 1, "
-                + "column 3 but that value can't be read from the result set. "
-                + "This usually means the column does not exist. \nCaused by SQL error:"));
+        try (final ResultSet result = query("SELECT * FROM T")) {
+            final AssertionError error = assertThrows(AssertionError.class, () -> orderedMatcher.matches(result));
+            assertThat(error.getMessage(), startsWith("Row expectation definition 1 tries to validate the value of row 1, "
+                    + "column 3 but that value can't be read from the result set. "
+                    + "This usually means the column does not exist. \nCaused by SQL error:"));
+
+        }
     }
 }
