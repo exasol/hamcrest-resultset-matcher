@@ -11,7 +11,7 @@ import org.junit.jupiter.api.*;
 /**
  * This integration test runs cell content matching tests against the Apache Derby database.
  */
-class CellValueMatcherITCellValueMatcherIT extends AbstractCellValueMatcherTest {
+class CellValueMatcherIT extends AbstractCellValueMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
         final Connection connection = DriverManager.getConnection("jdbc:derby:memory:test;create=true");
