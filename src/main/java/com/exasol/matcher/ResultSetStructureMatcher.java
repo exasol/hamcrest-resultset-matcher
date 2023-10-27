@@ -137,7 +137,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         boolean ok = true;
         try {
             int rowIndex = 0;
-            int matcherRowIndex = 1;
+            int matcherRowIndex = 0;
             for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
                 ++matcherRowIndex;
                 if (resultSet.next()) {
@@ -164,7 +164,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             final int numberOfRowMatchers = this.cellMatcherTable.size();
             int[] matchesForRowMatcher = new int[numberOfRowMatchers];
             int rowIndex = 0;
-            int matcherRowIndex = 1;
+            int matcherRowIndex = 0;
             while (resultSet.next()) {
                 ++rowIndex;
                 boolean anyMatchForThisResultRow = false;
