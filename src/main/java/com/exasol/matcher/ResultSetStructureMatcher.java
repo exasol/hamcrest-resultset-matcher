@@ -137,10 +137,12 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         boolean ok = true;
         try {
             int rowIndex = 0;
+            int matcherRowIndex = 0;
             for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
+                ++matcherRowIndex;
                 if (resultSet.next()) {
                     ++rowIndex;
-                    ok = ok && matchValuesInRow(resultSet, rowIndex, cellMatcherRow, true);
+                    ok = ok && matchValuesInRow(resultSet, rowIndex, matcherRowIndex, cellMatcherRow, true);
                 } else {
                     ok = false;
                 }
@@ -162,12 +164,14 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             final int numberOfRowMatchers = this.cellMatcherTable.size();
             int[] matchesForRowMatcher = new int[numberOfRowMatchers];
             int rowIndex = 0;
+            int matcherRowIndex = 0;
             while (resultSet.next()) {
                 ++rowIndex;
                 boolean anyMatchForThisResultRow = false;
                 int matcherIndex = 0;
                 for (final List<Matcher<?>> cellMatcherRow : this.cellMatcherTable) {
-                    if (matchValuesInRow(resultSet, rowIndex, cellMatcherRow, false)) {
+                    ++matcherRowIndex;
+                    if (matchValuesInRow(resultSet, rowIndex, matcherRowIndex, cellMatcherRow, false)) {
                         ++matchesForRowMatcher[matcherIndex];
                         anyMatchForThisResultRow = true;
                     }
@@ -241,14 +245,15 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
      * recording it at this early stage is not useful.
      * </p>
      *
-     * @param resultSet result set from which to read the cell values
-     * @param rowIndex index of the row in the result set
-     * @param cellMatcherRow list of matchers that are tested against the row's cells
+     * @param resultSet            result set from which to read the cell values
+     * @param rowIndex             index of the row in the result set
+     * @param matcherRowIndex      index of the matcher definition
+     * @param cellMatcherRow       list of matchers that are tested against the row's cells
      * @param recordFirstDeviation record the first mismatch when set to {@code true}
      * @return {@code true} if the given matchers match all cells in this row
      */
-    private boolean matchValuesInRow(final ResultSet resultSet, final int rowIndex,
-            final List<Matcher<?>> cellMatcherRow, final boolean recordFirstDeviation) {
+    private boolean matchValuesInRow(final ResultSet resultSet, final int rowIndex, int matcherRowIndex,
+                                     final List<Matcher<?>> cellMatcherRow, final boolean recordFirstDeviation) {
         int columnIndex = 0;
         try {
             for (final Matcher<?> cellMatcher : cellMatcherRow) {
@@ -262,8 +267,10 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 }
             }
         } catch (final SQLException exception) {
-            throw new AssertionError("Unable to read actual result set value in row " + rowIndex + ", column "
-                    + columnIndex + ": " + exception.getMessage(), exception);
+            throw new AssertionError("Row expectation definition " + matcherRowIndex +
+                    " tries to validate the value of row " + rowIndex + ", column "
+                    + columnIndex + " but that value can't be read from the result set. "
+                    + "This usually means the column does not exist. \nCaused by SQL error: " + exception.getMessage());
         }
         return true;
     }
@@ -347,6 +354,13 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         private BigDecimal tolerance = BigDecimal.ZERO;
         private Calendar calendar;
         private boolean requireSameOrder = true;
+
+        /**
+         * Create a new instance of a {@link ResultSetStructureMatcher.Builder}.
+         */
+        public Builder() {
+            // intentionally empty
+        }
 
         /**
          * Add a column to the structure to be matched.
