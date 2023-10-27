@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>1.6.1</version>
+    <version>1.6.2</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher/</url>
@@ -30,7 +30,8 @@
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>
-            <version>10.15.2.0</version> <!-- Versions >= 10.16 require Java 17. -->
+            <version>10.15.2.0</version>
+            <!-- Versions >= 10.16 require Java 17. -->
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -42,7 +43,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>1.19.0</version>
+            <version>1.19.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -53,7 +54,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1.19.0</version>
+            <version>1.19.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -62,7 +63,7 @@
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>2.9.12</version>
+                <version>2.9.14</version>
                 <executions>
                     <execution>
                         <goals>
@@ -76,7 +77,7 @@
     <parent>
         <artifactId>hamcrest-resultset-matcher-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>1.6.1</version>
+        <version>1.6.2</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
