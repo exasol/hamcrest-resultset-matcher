@@ -4,3 +4,7 @@ sources:
     modules:
       - maven_central
       - integration_tests
+build:
+  exasolDbVersions:
+    - "8.23.1"
+    - "7.1.24"
