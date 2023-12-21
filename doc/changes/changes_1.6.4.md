@@ -14,6 +14,10 @@ Please note that vulnerability CVE-2022-46337 in test dependency `org.apache.der
 
 ## Dependency Updates
 
+### Compile Dependency Updates
+
+* Removed `com.exasol:error-reporting-java:1.0.1`
+
 ### Test Dependency Updates
 
 * Updated `com.exasol:exasol-testcontainers:6.6.3` to `7.0.0`
