@@ -7,8 +7,6 @@ import java.util.logging.Logger;
 
 import org.hamcrest.*;
 
-import com.exasol.errorreporting.ExaError;
-
 /**
  * Hamcrest matcher that compares JDBC result sets against Java object structures.
  * <p>
@@ -105,11 +103,11 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
             mismatchDescription //
                     .appendList(" (", ", ", ")", this.actualColumns);
         }
-        if(this.ambiguousRowMatch) {
+        if (this.ambiguousRowMatch) {
             mismatchDescription.appendText(" where at least one expected row matched multiple result rows. "
                     + "Please narrow down the matching criteria to avoid ambiguity.");
         } else if (this.contentDeviates) {
-            if(this.requireSameOrder) {
+            if (this.requireSameOrder) {
                 mismatchDescription.appendText(" where content deviates starting row ") //
                         .appendValue(this.deviationStartRow) //
                         .appendText(", column ") //
@@ -128,8 +126,8 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
 
     @Override
     protected boolean matchesSafely(final ResultSet resultSet) {
-        boolean columnsOk = matchColumns(resultSet);
-        boolean rowsOk = this.requireSameOrder ? matchRowsInOrder(resultSet) : matchRowsInAnyOrder(resultSet);
+        final boolean columnsOk = matchColumns(resultSet);
+        final boolean rowsOk = this.requireSameOrder ? matchRowsInOrder(resultSet) : matchRowsInAnyOrder(resultSet);
         return columnsOk && rowsOk;
     }
 
@@ -162,7 +160,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
         boolean ok = true;
         try {
             final int numberOfRowMatchers = this.cellMatcherTable.size();
-            int[] matchesForRowMatcher = new int[numberOfRowMatchers];
+            final int[] matchesForRowMatcher = new int[numberOfRowMatchers];
             int rowIndex = 0;
             int matcherRowIndex = 0;
             while (resultSet.next()) {
@@ -192,14 +190,14 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private void recordRowMatchResult(final int rowIndex, final boolean anyMatchForThisResultRow) {
-        if (!anyMatchForThisResultRow && !this.contentDeviates)
-        {
+        if (!anyMatchForThisResultRow && !this.contentDeviates) {
             this.contentDeviates = true;
             this.deviationStartRow = rowIndex;
         }
     }
 
-    private boolean validateAllMatchersMatchedExactlyOnce(final int numberOfRowMatchers, final int[] matchesForRowMatcher) {
+    private boolean validateAllMatchersMatchedExactlyOnce(final int numberOfRowMatchers,
+            final int[] matchesForRowMatcher) {
         for (int matcherIndex = 0; matcherIndex < numberOfRowMatchers; ++matcherIndex) {
             if (matchesForRowMatcher[matcherIndex] == 0) {
                 return false;
@@ -252,8 +250,8 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
      * @param recordFirstDeviation record the first mismatch when set to {@code true}
      * @return {@code true} if the given matchers match all cells in this row
      */
-    private boolean matchValuesInRow(final ResultSet resultSet, final int rowIndex, int matcherRowIndex,
-                                     final List<Matcher<?>> cellMatcherRow, final boolean recordFirstDeviation) {
+    private boolean matchValuesInRow(final ResultSet resultSet, final int rowIndex, final int matcherRowIndex,
+            final List<Matcher<?>> cellMatcherRow, final boolean recordFirstDeviation) {
         int columnIndex = 0;
         try {
             for (final Matcher<?> cellMatcher : cellMatcherRow) {
@@ -267,9 +265,9 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
                 }
             }
         } catch (final SQLException exception) {
-            throw new AssertionError("Row expectation definition " + matcherRowIndex +
-                    " tries to validate the value of row " + rowIndex + ", column "
-                    + columnIndex + " but that value can't be read from the result set. "
+            throw new AssertionError("Row expectation definition " + matcherRowIndex
+                    + " tries to validate the value of row " + rowIndex + ", column " + columnIndex
+                    + " but that value can't be read from the result set. "
                     + "This usually means the column does not exist. \nCaused by SQL error: " + exception.getMessage());
         }
         return true;
@@ -303,15 +301,14 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
     }
 
     private void displayCalendarWarning() {
-        LOGGER.warning(() -> ExaError.messageBuilder("W-HRM-1").message(
-                "Reading a timestamp or date value without configured calendar. That's dangerous since the JDBC driver is using the time-zone of the test system in that case.")
-                .mitigation(
-                        "You can fix this by providing a calendar using 'withCalendar(Calendar)'. For example 'Calendar.getInstance(TimeZone.getTimeZone(\"UTC\"))'.")
-                .toString());
+        LOGGER.warning(
+                () -> "Reading a timestamp or date value without configured calendar. That's dangerous since the JDBC driver is using the time-zone of the test system in that case. "
+                        + "You can fix this by providing a calendar using 'withCalendar(Calendar)'. For example 'Calendar.getInstance(TimeZone.getTimeZone(\"UTC\"))'.");
         this.isCalendarWarningDisplayed = true;
     }
 
-    private void recordFirstDeviation(final Object value, final Matcher<?> cellMatcher, final int rowIndex, final int columnIndex) {
+    private void recordFirstDeviation(final Object value, final Matcher<?> cellMatcher, final int rowIndex,
+            final int columnIndex) {
         this.contentDeviates = true;
         this.deviationStartRow = rowIndex;
         this.deviationStartColumn = columnIndex;
