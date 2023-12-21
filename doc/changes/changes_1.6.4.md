@@ -1,4 +1,4 @@
-# Matcher for SQL Result Sets 1.6.4, released 2023-12-22
+# Matcher for SQL Result Sets 1.6.4, released 2023-12-21
 
 Code name: Upgrade dependencies on top of 1.6.3
 
