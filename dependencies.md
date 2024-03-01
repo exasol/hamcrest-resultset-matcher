@@ -27,9 +27,9 @@
 | [Apache Maven Compiler Plugin][14]                      | [Apache-2.0][13]                  |
 | [Apache Maven Enforcer Plugin][15]                      | [Apache-2.0][13]                  |
 | [Maven Flatten Plugin][16]                              | [Apache Software Licenese][13]    |
-| [Project Keeper Maven plugin][17]                       | [The MIT License][18]             |
-| [org.sonatype.ossindex.maven:ossindex-maven-plugin][19] | [ASL2][5]                         |
-| [Maven Surefire Plugin][20]                             | [Apache-2.0][13]                  |
+| [org.sonatype.ossindex.maven:ossindex-maven-plugin][17] | [ASL2][5]                         |
+| [Maven Surefire Plugin][18]                             | [Apache-2.0][13]                  |
+| [Project Keeper Maven plugin][19]                       | [The MIT License][20]             |
 | [Versions Maven Plugin][21]                             | [Apache License, Version 2.0][13] |
 | [duplicate-finder-maven-plugin Maven Mojo][22]          | [Apache License 2.0][23]          |
 | [Apache Maven Deploy Plugin][24]                        | [Apache-2.0][13]                  |
@@ -59,10 +59,10 @@
 [14]: https://maven.apache.org/plugins/maven-compiler-plugin/
 [15]: https://maven.apache.org/enforcer/maven-enforcer-plugin/
 [16]: https://www.mojohaus.org/flatten-maven-plugin/
-[17]: https://github.com/exasol/project-keeper/
-[18]: https://github.com/exasol/project-keeper/blob/main/LICENSE
-[19]: https://sonatype.github.io/ossindex-maven/maven-plugin/
-[20]: https://maven.apache.org/surefire/maven-surefire-plugin/
+[17]: https://sonatype.github.io/ossindex-maven/maven-plugin/
+[18]: https://maven.apache.org/surefire/maven-surefire-plugin/
+[19]: https://github.com/exasol/project-keeper/
+[20]: https://github.com/exasol/project-keeper/blob/main/LICENSE
 [21]: https://www.mojohaus.org/versions/versions-maven-plugin/
 [22]: https://basepom.github.io/duplicate-finder-maven-plugin
 [23]: http://www.apache.org/licenses/LICENSE-2.0.html
