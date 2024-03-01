@@ -17,6 +17,7 @@ This release fixes vulnerabilities CVE-2024-25710 and CVE-2024-26308 in test dep
 * Updated `com.exasol:exasol-testcontainers:7.0.0` to `7.0.1`
 * Updated `org.junit.jupiter:junit-jupiter-engine:5.10.1` to `5.10.2`
 * Updated `org.junit.jupiter:junit-jupiter-params:5.10.1` to `5.10.2`
+* Added `org.slf4j:slf4j-jdk14:2.0.12`
 * Updated `org.testcontainers:jdbc:1.19.3` to `1.19.6`
 * Updated `org.testcontainers:junit-jupiter:1.19.3` to `1.19.6`
 
