@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>hamcrest-resultset-matcher</artifactId>
-    <version>1.6.4</version>
+    <version>1.6.5</version>
     <name>Matcher for SQL Result Sets</name>
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher/</url>
     <properties>
-        <junit.version>5.10.1</junit.version>
-        <testcontainers.version>1.19.3</testcontainers.version>
+        <junit.version>5.10.2</junit.version>
+        <testcontainers.version>1.19.6</testcontainers.version>
     </properties>
     <dependencies>
         <dependency>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>7.0.0</version>
+            <version>7.0.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -53,13 +53,20 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <!-- Enable logging for integration tests -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>2.0.12</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
             <plugin>
                 <groupId>com.exasol</groupId>
                 <artifactId>project-keeper-maven-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>4.1.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -67,6 +74,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <!-- Versions >= 10.16 require Java 17 -->
+                        <exclude>org.apache.derby:derby:jar:*:*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.ossindex.maven</groupId>
@@ -84,7 +101,7 @@
     <parent>
         <artifactId>hamcrest-resultset-matcher-generated-parent</artifactId>
         <groupId>com.exasol</groupId>
-        <version>1.6.4</version>
+        <version>1.6.5</version>
         <relativePath>pk_generated_parent.pom</relativePath>
     </parent>
 </project>
