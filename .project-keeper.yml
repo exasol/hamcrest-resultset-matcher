@@ -8,3 +8,5 @@ build:
   exasolDbVersions:
     - "8.25.0"
     - "7.1.25"
+excludes:
+  - "E-PK-CORE-18: Outdated content: '.github/workflows/ci-build.yml'"
