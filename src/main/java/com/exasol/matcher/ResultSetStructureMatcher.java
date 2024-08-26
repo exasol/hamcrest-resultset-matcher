@@ -468,7 +468,7 @@ public class ResultSetStructureMatcher extends TypeSafeMatcher<ResultSet> {
          * @param typeMatchMode mode for type matching
          * @return matcher the new matcher
          */
-        private Matcher<ResultSet> matchesInAnyOrder(final TypeMatchMode typeMatchMode) {
+        public Matcher<ResultSet> matchesInAnyOrder(final TypeMatchMode typeMatchMode) {
             this.requireSameOrder = false;
             this.typeMatchMode = typeMatchMode;
             return new ResultSetStructureMatcher(this);
