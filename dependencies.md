@@ -3,9 +3,9 @@
 
 ## Compile Dependencies
 
-| Dependency    | License            |
-| ------------- | ------------------ |
-| [Hamcrest][0] | [BSD License 3][1] |
+| Dependency    | License           |
+| ------------- | ----------------- |
+| [Hamcrest][0] | [BSD-3-Clause][1] |
 
 ## Test Dependencies
 
@@ -24,7 +24,7 @@
 | Dependency                                              | License                           |
 | ------------------------------------------------------- | --------------------------------- |
 | [SonarQube Scanner for Maven][12]                       | [GNU LGPL 3][13]                  |
-| [Apache Maven Toolchains Plugin][14]                    | [Apache License, Version 2.0][15] |
+| [Apache Maven Toolchains Plugin][14]                    | [Apache-2.0][15]                  |
 | [Apache Maven Compiler Plugin][16]                      | [Apache-2.0][15]                  |
 | [Apache Maven Enforcer Plugin][17]                      | [Apache-2.0][15]                  |
 | [Maven Flatten Plugin][18]                              | [Apache Software Licenese][15]    |
@@ -39,12 +39,12 @@
 | [Apache Maven Javadoc Plugin][29]                       | [Apache-2.0][15]                  |
 | [Nexus Staging Maven Plugin][30]                        | [Eclipse Public License][31]      |
 | [Maven Failsafe Plugin][32]                             | [Apache-2.0][15]                  |
-| [JaCoCo :: Maven Plugin][33]                            | [Eclipse Public License 2.0][34]  |
+| [JaCoCo :: Maven Plugin][33]                            | [EPL-2.0][34]                     |
 | [error-code-crawler-maven-plugin][35]                   | [MIT License][36]                 |
 | [Reproducible Build Maven Plugin][37]                   | [Apache 2.0][5]                   |
 
 [0]: http://hamcrest.org/JavaHamcrest/
-[1]: http://opensource.org/licenses/BSD-3-Clause
+[1]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
 [2]: https://junit.org/junit5/
 [3]: https://www.eclipse.org/legal/epl-v20.html
 [4]: http://db.apache.org/derby/

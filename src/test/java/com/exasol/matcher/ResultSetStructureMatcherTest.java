@@ -180,7 +180,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO IN_ANY_ORDER_MATCHER VALUES ('first', 1), ('second', 2), ('third', 3)");
         assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER"), table() //
                 .row("second", 2) //
-                .row("third", 3)
+                .row("third", 3) //
                 .row("first", 1).matchesInAnyOrder());
     }
 
@@ -190,7 +190,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         execute("INSERT INTO IN_ANY_ORDER_MATCHER_NESTED VALUES ('first', 1), ('second', 2), ('third', 3)");
         assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER_NESTED"), table() //
                 .row(containsString("con"), 2) //
-                .row("third", greaterThan(2))
+                .row("third", greaterThan(2)) //
                 .row("first", 1).matchesInAnyOrder());
     }
 
@@ -199,7 +199,7 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
         execute("CREATE TABLE IN_ANY_ORDER_MATCHER_TOO_MANY_ROWS(COL1 VARCHAR(10), COL2 INTEGER)");
         execute("INSERT INTO IN_ANY_ORDER_MATCHER_TOO_MANY_ROWS VALUES ('first', 1), ('second', 2), ('third', 3)");
         assertQueryResultNotMatched("SELECT * FROM IN_ANY_ORDER_MATCHER_TOO_MANY_ROWS", //
-                table().row("second", 2).row("third", 3).matchesInAnyOrder(),
+                table().row("second", 2).row("third", 3).matchesInAnyOrder(), //
                 "ResultSet with <2> rows and <2> columns", //
                 "ResultSet with <3> rows and <2> columns"
                         + " where row <1> was the first that did not match any expected row");
@@ -226,7 +226,6 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
                         + " where row <3> was the first that did not match any expected row");
     }
 
-
     @Test
     void testMatchInAnyOrderFailsBecauseOfAmbiguousMatch() {
         execute("CREATE TABLE IN_ANY_ORDER_MATCHER_AMBIGUOUS(COL1 VARCHAR(10))");
@@ -247,5 +246,15 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
                 table("CHAR(10)").row("Toe").row("Tac").row(matchesPattern("Tic")).matchesInAnyOrder(),
                 "ResultSet with <3> rows and <1> columns (CHAR(10))", //
                 "ResultSet with <3> rows and <1> columns (VARCHAR)");
+    }
+
+    @Test
+    void testMatchInAnyOrderWithNestedMatcherWithTypeCheckMode() {
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER VALUES ('first', 1), ('second', 2), ('third', 3)");
+        assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER"), table() //
+                .row("second", (long) 2) //
+                .row("third", (byte) 3) //
+                .row("first", (int) 1).matchesInAnyOrder(TypeMatchMode.NO_JAVA_TYPE_CHECK));
     }
 }
