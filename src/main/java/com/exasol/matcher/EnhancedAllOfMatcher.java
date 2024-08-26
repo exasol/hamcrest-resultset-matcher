@@ -24,6 +24,7 @@ public class EnhancedAllOfMatcher<T> extends DiagnosingMatcher<T> {
      * @return built {@link EnhancedAllOfMatcher}
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> Matcher<T> enhancedAllOf(final Matcher<? super T>... matchers) {
         return new EnhancedAllOfMatcher<T>(Arrays.asList(matchers));
     }

@@ -250,11 +250,11 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
 
     @Test
     void testMatchInAnyOrderWithNestedMatcherWithTypeCheckMode() {
-        execute("CREATE TABLE IN_ANY_ORDER_MATCHER(COL1 VARCHAR(10), COL2 INTEGER)");
-        execute("INSERT INTO IN_ANY_ORDER_MATCHER VALUES ('first', 1), ('second', 2), ('third', 3)");
-        assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER"), table() //
+        execute("CREATE TABLE IN_ANY_ORDER_MATCHER_WITH_TYPE_CHECK_MODE(COL1 VARCHAR(10), COL2 INTEGER)");
+        execute("INSERT INTO IN_ANY_ORDER_MATCHER_WITH_TYPE_CHECK_MODE VALUES ('first', 1), ('second', 2), ('third', 3)");
+        assertThat(query("SELECT * FROM IN_ANY_ORDER_MATCHER_WITH_TYPE_CHECK_MODE order by col2"), table() //
                 .row("second", (long) 2) //
                 .row("third", (byte) 3) //
-                .row("first", (int) 1).matchesInAnyOrder(TypeMatchMode.NO_JAVA_TYPE_CHECK));
+                .row("first", 1).matchesInAnyOrder(TypeMatchMode.NO_JAVA_TYPE_CHECK));
     }
 }
