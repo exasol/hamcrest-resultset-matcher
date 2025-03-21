@@ -17,7 +17,7 @@
 | [Test containers for Exasol on Docker][6]                  | [MIT License][7]                 |
 | [Testcontainers :: JUnit Jupiter Extension][8]             | [MIT][9]                         |
 | [Testcontainers :: JDBC][8]                                | [MIT][9]                         |
-| [SLF4J JDK14 Provider][10]                                 | [MIT License][11]                |
+| [SLF4J JDK14 Provider][10]                                 | [MIT][11]                        |
 
 ## Plugin Dependencies
 
@@ -54,7 +54,7 @@
 [8]: https://java.testcontainers.org
 [9]: http://opensource.org/licenses/MIT
 [10]: http://www.slf4j.org
-[11]: http://www.opensource.org/licenses/mit-license.php
+[11]: https://opensource.org/license/mit
 [12]: http://sonarsource.github.io/sonar-scanner-maven/
 [13]: http://www.gnu.org/licenses/lgpl.txt
 [14]: https://maven.apache.org/plugins/maven-toolchains-plugin/
