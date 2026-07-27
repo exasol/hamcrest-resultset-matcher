@@ -53,3 +53,7 @@ This is an open source project which is written by enthusiasts at Exasol and not
 * [User Guide](doc/user_guide/user_guide.md)
 * [Changelog](doc/changes/changelog.md)
 * [Dependencies](dependencies.md)
+
+## Information for Developers
+
+* [Developer Guide](doc/developer_guide/developer_guide.md)

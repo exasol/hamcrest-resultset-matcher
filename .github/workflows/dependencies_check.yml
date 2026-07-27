@@ -4,7 +4,7 @@ on:
   workflow_dispatch: null
   schedule:
     - {
-      cron: 0 2 * * *
+      cron: 42 22 * * 0
     }
 jobs:
   report_security_issues:
@@ -25,20 +25,24 @@ jobs:
       cancel-in-progress: true
     }
     steps:
-      - {
-        name: Checkout,
-        id: checkout,
-        uses: actions/checkout@v4
-      }
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v7
+        with: {
+          persist-credentials: false
+        }
       - name: Set up JDKs
         id: setup-jdks
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: |-
-            11
             17
+            21
           cache: maven
+          server-id: ossindex
+          server-username: OSSINDEX_USERNAME
+          server-password: OSSINDEX_API_TOKEN
       - name: Generate ossindex report
         id: ossindex-report
         run: |
@@ -46,9 +50,13 @@ jobs:
               org.sonatype.ossindex.maven:ossindex-maven-plugin:audit-aggregate \
               -Dossindex.reportFile=$(pwd)/ossindex-report.json \
               -Dossindex.fail=false
+        env: {
+          OSSINDEX_USERNAME: '${{ secrets.OSSINDEX_USERNAME }}',
+          OSSINDEX_API_TOKEN: '${{ secrets.OSSINDEX_API_TOKEN }}'
+        }
       - name: Create GitHub Issues
         id: create-security-issues
-        uses: exasol/python-toolbox/.github/actions/security-issues@1.1.0
+        uses: exasol/python-toolbox/.github/actions/security-issues@10.1.0
         with: {
           format: maven,
           command: cat ossindex-report.json,

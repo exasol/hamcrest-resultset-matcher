@@ -11,6 +11,7 @@ import java.sql.*;
 
 import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
@@ -18,6 +19,7 @@ import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 // Derby does not support SELECT FROM VALUES, so we have to create actual tables and insert values into them in the
 // test preparation. Don't try to rewrite this with SELECT FROM VALUES.
 
+@Tag("requires-java-21")
 class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
@@ -167,10 +169,10 @@ class ResultSetStructureMatcherTest extends AbstractResultSetMatcherTest {
     void testMatchWithToleranceUsingCellMatcher() {
         execute("CREATE TABLE SIMPLE_FLOATS_CELL_MATCHER(COL1 FLOAT)");
         execute("INSERT INTO SIMPLE_FLOATS_CELL_MATCHER VALUES (1.34), (2.567998)");
-        final BigDecimal EPS = BigDecimal.valueOf(0.015);
+        final BigDecimal eps = BigDecimal.valueOf(0.015);
         assertThat(query("SELECT * FROM SIMPLE_FLOATS_CELL_MATCHER"), table() //
-                .row(CellMatcherFactory.cellMatcher(1.35, TypeMatchMode.STRICT, EPS)) //
-                .row(CellMatcherFactory.cellMatcher(2.567997, TypeMatchMode.STRICT, EPS)) //
+                .row(CellMatcherFactory.cellMatcher(1.35, TypeMatchMode.STRICT, eps)) //
+                .row(CellMatcherFactory.cellMatcher(2.567997, TypeMatchMode.STRICT, eps)) //
                 .matches());
     }
 

@@ -15,9 +15,11 @@ import java.sql.Statement;
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.MultipleFailuresError;
 
+@Tag("requires-java-21")
 class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
     private Connection connection;
 
