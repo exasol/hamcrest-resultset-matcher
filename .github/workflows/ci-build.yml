@@ -33,12 +33,12 @@ jobs:
       fail-fast: false
       matrix:
         exasol_db_version: [
-          8.29.1,
-          7.1.29
+          2026.1.0,
+          2025.1.13
         ]
         
     env: {
-      DEFAULT_EXASOL_DB_VERSION: 8.29.1
+      DEFAULT_EXASOL_DB_VERSION: 2026.1.0
     }
     steps:
       - name: Free Disk Space
@@ -88,7 +88,7 @@ jobs:
         env: {
           EXASOL_DB_VERSION: '${{ matrix.exasol_db_version }}'
         }
-      - name: Run Java 11 unit tests
+      - name: Run Java 11 tests
         id: test-java-11
         run: |
           mvn --batch-mode clean test \
