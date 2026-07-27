@@ -9,7 +9,7 @@
     <properties>
         <!-- Compile Java 11-compatible bytecode and run the primary test suite on Java 17. -->
         <java.version>17</java.version>
-        <junit.version>5.12.2</junit.version>
+        <junit.version>5.14.4</junit.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
     <dependencies>
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>com.exasol</groupId>
             <artifactId>exasol-testcontainers</artifactId>
-            <version>7.1.7</version>
+            <version>7.3.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

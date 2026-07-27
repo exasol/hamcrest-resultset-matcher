@@ -35,9 +35,10 @@ CWE: CWE-674
 
 ### Test Dependency Updates
 
+* Updated `com.exasol:exasol-testcontainers:7.1.7` to `7.3.0`
 * Updated `org.apache.derby:derby:10.15.2.0` to `10.17.1.0`
-* Updated `org.junit.jupiter:junit-jupiter-engine:5.11.0` to `5.12.2`
-* Updated `org.junit.jupiter:junit-jupiter-params:5.11.0` to `5.12.2`
+* Updated `org.junit.jupiter:junit-jupiter-engine:5.11.0` to `5.14.4`
+* Updated `org.junit.jupiter:junit-jupiter-params:5.11.0` to `5.14.4`
 * Updated `org.slf4j:slf4j-jdk14:2.0.17` to `2.0.18`
 * Updated `org.testcontainers:jdbc:1.20.1` to `1.21.4`
 * Updated `org.testcontainers:junit-jupiter:1.20.1` to `1.21.4`

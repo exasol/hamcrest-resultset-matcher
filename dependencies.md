@@ -52,7 +52,7 @@
 
 [0]: http://hamcrest.org/JavaHamcrest/
 [1]: https://raw.githubusercontent.com/hamcrest/JavaHamcrest/master/LICENSE
-[2]: https://junit.org/junit5/
+[2]: https://junit.org/
 [3]: https://www.eclipse.org/legal/epl-v20.html
 [4]: http://db.apache.org/derby/
 [5]: http://www.apache.org/licenses/LICENSE-2.0.txt
