@@ -34,15 +34,14 @@ jobs:
       - name: Set up JDKs
         id: setup-jdks
         uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: |-
-            17
-            21
-          cache: maven
-          server-id: ossindex
-          server-username: OSSINDEX_USERNAME
+        with: {
+          distribution: temurin,
+          java-version: '21',
+          cache: maven,
+          server-id: ossindex,
+          server-username: OSSINDEX_USERNAME,
           server-password: OSSINDEX_API_TOKEN
+        }
       - name: Generate ossindex report
         id: ossindex-report
         run: |

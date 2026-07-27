@@ -22,22 +22,23 @@ build:
               distribution: temurin
               java-version: |-
                 11
-                17
                 21
               cache: maven
         - action: INSERT_AFTER
           job: matrix-build
           stepId: build-pk-verify
           content:
-            # Note that this restriction is required to be able to integration test against a modern version of derby.
+            # While we want to keep Java 11 compatibility, we can only run some tests with it.
+            # This restriction is required to be able to integration test against a modern version of derby.
             # Without this distinction we would be forced to use a non-maintained version of derby and thus have
             # vulnerabilities in our supply chain.
-            name: Run Java 11 tests
-            id: test-java-11
+            # @EnabledForJreRange markers in the integration tests prevent running the integration tests.
+            # Also, we are only calling the 'test' target here, which only runs Surefire (unit tests).
+            name: Run Java 11 unit tests
+            id: test-java-11-unit
             run: |
               mvn --batch-mode clean test \
                   -Djava.version=11 \
-                  -Dtest.excludeTags=requires-java-21 \
                   -Denforcer.skip=true \
                   -DossindexSkip=true \
                   -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \

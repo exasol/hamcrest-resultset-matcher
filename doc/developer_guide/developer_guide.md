@@ -1,33 +1,51 @@
 # Developer Guide
 
-## Testing with multiple Java versions
+## Building with Java 21 and Java 11 compatibility
 
-The production sources are compiled as Java 11-compatible bytecode. The full test suite uses newer Java versions because Apache Derby 10.17 requires Java 21 or later.
+The build uses Java 21 as its primary JDK. Maven selects that JDK through the
+`java.version` property in `pom.xml` and the Maven Toolchains configuration.
+Run the complete build, including integration tests, with:
 
-### Java 11 unit tests
+```shell
+mvn clean verify
+```
 
-The Java 11 CI step runs the normal Maven Surefire test selection and excludes tests tagged `requires-java-21`:
+The published library remains compatible with Java 11. The Maven Compiler and
+Javadoc plugins use `--release 11` (`<release>11</release>`), which both emits
+Java 11 bytecode and limits the available Java APIs to the Java 11 API surface.
+Consequently, production code must not use Java language features or JDK APIs
+introduced after Java 11, even though the build runs on Java 21.
+
+The CI build also runs the regular unit-test selection with Java 11 to validate
+that compatibility:
 
 ```shell
 mvn --batch-mode clean test \
     -Djava.version=11 \
-    -Dtest.excludeTags=requires-java-21 \
     -Denforcer.skip=true
 ```
 
-`-Denforcer.skip=true` is required because the regular build enforces the primary Java version. The command runs Surefire tests only; it does not invoke Maven Failsafe, so integration tests are not run with Java 11.
+`-Denforcer.skip=true` is required because the normal build requires Java 21.
+The `test` goal runs Maven Surefire only; use `verify` on Java 21 to include
+the Maven Failsafe integration tests.
 
-### Marking tests that need Java 21
+## Marking tests that require Java 21
 
-Add the `requires-java-21` JUnit tag to every Surefire test class that uses Derby or another dependency which cannot run on Java 11:
+Apache Derby 10.17 requires Java 21 or later. Mark a Derby-backed test class or
+method with JUnit Jupiter's JRE-range condition so that JUnit skips it on an
+older runtime:
 
 ```java
-import org.junit.jupiter.api.Tag;
+import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
-@Tag("requires-java-21")
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+
+@EnabledForJreRange(min = JAVA_21)
 class DatabaseBackedTest {
     // ...
 }
 ```
 
-Do not add class names to the CI command. The tag keeps the Java 11 test selection automatic as tests are added or renamed.
+Use the annotation rather than a custom JUnit tag. It expresses the runtime
+requirement at the test itself and applies to both individual methods and whole
+test classes.

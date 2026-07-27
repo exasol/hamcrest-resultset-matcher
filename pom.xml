@@ -7,8 +7,9 @@
     <description>This project provides hamcrest matcher that compares java.sql.ResultSet objects.</description>
     <url>https://github.com/exasol/hamcrest-resultset-matcher/</url>
     <properties>
-        <!-- Compile Java 11-compatible bytecode and run the primary test suite on Java 17. -->
-        <java.version>17</java.version>
+        <!-- Compile Java 11-compatible bytecode and run the primary test suite on Java 21. -->
+        <java.version>21</java.version>
+        <maven.compiler.release>11</maven.compiler.release>
         <junit.version>5.14.4</junit.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
