@@ -16,7 +16,6 @@
 | [Apache Derby Database Engine and Embedded JDBC Driver][4] | [Apache 2][5]                    |
 | [Test containers for Exasol on Docker][6]                  | [MIT License][7]                 |
 | [Testcontainers :: JUnit Jupiter Extension][8]             | [MIT][9]                         |
-| [Testcontainers :: JDBC][8]                                | [MIT][9]                         |
 | [SLF4J JDK14 Provider][10]                                 | [MIT][11]                        |
 
 ## Plugin Dependencies
