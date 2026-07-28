@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.MultipleFailuresError;
 
-class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
+class ResultSetMatcherIT extends AbstractResultSetMatcherTest {
     private Connection connection;
 
     @BeforeEach
