@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,12 +16,12 @@ import java.sql.Statement;
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
 import org.opentest4j.MultipleFailuresError;
 
-@Tag("requires-java-21")
-class ResultSetMatcherTest extends AbstractResultSetMatcherTest {
+@EnabledForJreRange(min = JAVA_21)
+class ResultSetMatcherIT extends AbstractResultSetMatcherTest {
     private Connection connection;
 
     @BeforeEach
