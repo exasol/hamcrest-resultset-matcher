@@ -4,7 +4,6 @@ import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledForJreRange;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,12 +13,10 @@ import java.sql.SQLException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 /**
  * This integration test runs row matching tests against the Apache Derby database.
  */
-@EnabledForJreRange(min = JAVA_21)
 class RowMatcherIT extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {

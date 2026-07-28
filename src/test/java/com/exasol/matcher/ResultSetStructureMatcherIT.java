@@ -5,7 +5,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -13,14 +12,12 @@ import java.sql.*;
 import org.hamcrest.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledForJreRange;
 
 import com.exasol.matcher.ResultSetStructureMatcher.Builder;
 
 // Derby does not support SELECT FROM VALUES, so we have to create actual tables and insert values into them in the
 // test preparation. Don't try to rewrite this with SELECT FROM VALUES.
 
-@EnabledForJreRange(min = JAVA_21)
 class ResultSetStructureMatcherIT extends AbstractResultSetMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {

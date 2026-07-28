@@ -7,14 +7,10 @@ import static org.hamcrest.Matchers.equalTo;
 import java.sql.*;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.condition.EnabledForJreRange;
-
-import static org.junit.jupiter.api.condition.JRE.JAVA_21;
 
 /**
  * This integration test runs cell content matching tests against the Apache Derby database.
  */
-@EnabledForJreRange(min = JAVA_21)
 class CellValueMatcherIT extends AbstractCellValueMatcherTest {
     @BeforeEach
     void beforeEach() throws SQLException {
