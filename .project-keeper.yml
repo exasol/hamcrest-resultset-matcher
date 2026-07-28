@@ -26,7 +26,7 @@ build:
               cache: maven
         - action: INSERT_AFTER
           job: matrix-build
-          stepId: build-pk-verify
+          stepId: enable-testcontainer-reuse
           content:
             # While we want to keep Java 11 compatibility, we can only run some tests with it.
             # This restriction is required to be able to integration test against a modern version of derby.

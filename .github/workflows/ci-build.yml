@@ -76,6 +76,15 @@ jobs:
         id: enable-testcontainer-reuse,
         run: echo 'testcontainers.reuse.enable=true' > "$HOME/.testcontainers.properties"
       }
+      - name: Run Java 11 unit tests
+        id: test-java-11-unit
+        run: |
+          mvn --batch-mode clean test \
+              -Djava.version=11 \
+              -Denforcer.skip=true \
+              -DossindexSkip=true \
+              -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
+              -DtrimStackTrace=false
       - name: Run tests and build with Maven
         id: build-pk-verify
         run: |
@@ -87,15 +96,6 @@ jobs:
         env: {
           EXASOL_DB_VERSION: '${{ matrix.exasol_db_version }}'
         }
-      - name: Run Java 11 unit tests
-        id: test-java-11-unit
-        run: |
-          mvn --batch-mode clean test \
-              -Djava.version=11 \
-              -Denforcer.skip=true \
-              -DossindexSkip=true \
-              -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
-              -DtrimStackTrace=false
       - name: Sonar analysis
         id: sonar-analysis
         if: ${{ env.SONAR_TOKEN != null && matrix.exasol_db_version == env.DEFAULT_EXASOL_DB_VERSION }}
