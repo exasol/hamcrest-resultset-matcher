@@ -50,7 +50,8 @@ In Eclipse Parsson published Maven Central artifacts before version 1.1.8, the J
 * Updated `org.junit.jupiter:junit-jupiter-params:5.11.0` to `5.14.4`
 * Updated `org.slf4j:slf4j-jdk14:2.0.17` to `2.0.18`
 * Removed `org.testcontainers:jdbc:1.20.1`
-* Updated `org.testcontainers:junit-jupiter:1.20.1` to `1.21.4`
+* Removed `org.testcontainers:junit-jupiter:1.20.1`
+* Added `org.testcontainers:testcontainers-junit-jupiter:2.0.5`
 
 ### Plugin Dependency Updates
 
