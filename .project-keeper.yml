@@ -6,8 +6,8 @@ sources:
       - integration_tests
 build:
   exasolDbVersions:
-    - "2026.1.0" # Latest
-    - "2025.1.13" # Newest LTS
+    - "2026.1.2" # Latest
+    - "2025.1.16" # Newest LTS
   workflows:
     - name: "ci-build.yml"
       stepCustomizations:
