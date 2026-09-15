@@ -6,13 +6,12 @@
         "source.fixAll": "explicit"
     },
     "java.codeGeneration.useBlocks": true,
-    "java.saveActions.organizeImports": true,
     "java.sources.organizeImports.starThreshold": 3,
     "java.sources.organizeImports.staticStarThreshold": 3,
     "java.test.config": {
         "vmArgs": [
             "-Djava.util.logging.config.file=src/test/resources/logging.properties",
-            "-Dcom.exasol.dockerdb.image=8.29.1"
+            "-Dcom.exasol.dockerdb.image=2026.1.2"
         ]
     },
     "sonarlint.connectedMode.project": {
