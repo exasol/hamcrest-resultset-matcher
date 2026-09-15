@@ -25,8 +25,6 @@ A security flaw has been discovered in mwiede jsch up to 2.28.5. Affected is the
 ### Test Dependency Updates
 
 * Updated `com.exasol:exasol-testcontainers:8.0.1` to `8.0.2`
-* Updated `org.junit.jupiter:junit-jupiter-engine:5.14.4` to `6.1.3`
-* Updated `org.junit.jupiter:junit-jupiter-params:5.14.4` to `6.1.3`
 * Updated `org.slf4j:slf4j-jdk14:2.0.18` to `2.0.19`
 
 ### Plugin Dependency Updates

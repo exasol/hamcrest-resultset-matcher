@@ -10,7 +10,8 @@
         <!-- Compile Java 11-compatible bytecode and run the primary test suite on Java 21. -->
         <java.version>21</java.version>
         <maven.compiler.release>11</maven.compiler.release>
-        <junit.version>6.1.3</junit.version>
+        <!-- Don't update to 6 as tests still run with Java 11 -->
+        <junit.version>5.14.4</junit.version>
     </properties>
     <dependencies>
         <dependency>
